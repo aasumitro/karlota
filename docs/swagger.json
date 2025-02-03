@@ -1,0 +1,545 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "Karlota REST API Documentation",
+        "title": "KARLOTA MESSENGER",
+        "contact": {
+            "name": "@aasumitro",
+            "url": "https://aasumitro.id/",
+            "email": "hello@aasumitro.id"
+        },
+        "version": "0.0.1-dev"
+    },
+    "paths": {
+        "/api/v1/account": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get User Profile",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Account"
+                ],
+                "summary": "User Profile",
+                "responses": {
+                    "200": {
+                        "description": "CREATED RESPOND",
+                        "schema": {
+                            "$ref": "#/definitions/karlota_aasumitro_id_internal_utils_http_wrapper.EmptyRespond"
+                        }
+                    },
+                    "400": {
+                        "description": "BAD REQUEST RESPOND",
+                        "schema": {
+                            "$ref": "#/definitions/karlota_aasumitro_id_internal_utils_http_wrapper.EmptyRespond"
+                        }
+                    },
+                    "500": {
+                        "description": "INTERNAL SERVER ERROR RESPOND",
+                        "schema": {
+                            "$ref": "#/definitions/karlota_aasumitro_id_internal_utils_http_wrapper.EmptyRespond"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Update user display name",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Account"
+                ],
+                "summary": "User Update Name",
+                "parameters": [
+                    {
+                        "description": "form request for login",
+                        "name": "form",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/karlota_aasumitro_id_internal_model_request.UpdateAccountRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK RESPOND",
+                        "schema": {
+                            "$ref": "#/definitions/karlota_aasumitro_id_internal_utils_http_wrapper.EmptyRespond"
+                        }
+                    },
+                    "400": {
+                        "description": "BAD REQUEST RESPOND",
+                        "schema": {
+                            "$ref": "#/definitions/karlota_aasumitro_id_internal_utils_http_wrapper.EmptyRespond"
+                        }
+                    },
+                    "422": {
+                        "description": "UNPROCESSABLE ENTITY RESPOND",
+                        "schema": {
+                            "$ref": "#/definitions/karlota_aasumitro_id_internal_utils_http_wrapper.EmptyRespond"
+                        }
+                    },
+                    "500": {
+                        "description": "INTERNAL SERVER ERROR RESPOND",
+                        "schema": {
+                            "$ref": "#/definitions/karlota_aasumitro_id_internal_utils_http_wrapper.EmptyRespond"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/account/password": {
+            "patch": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Update user password",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Account"
+                ],
+                "summary": "User Update Password",
+                "parameters": [
+                    {
+                        "description": "form request for login",
+                        "name": "form",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/karlota_aasumitro_id_internal_model_request.UpdatePasswordRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "CREATED RESPOND",
+                        "schema": {
+                            "$ref": "#/definitions/karlota_aasumitro_id_internal_utils_http_wrapper.EmptyRespond"
+                        }
+                    },
+                    "400": {
+                        "description": "BAD REQUEST RESPOND",
+                        "schema": {
+                            "$ref": "#/definitions/karlota_aasumitro_id_internal_utils_http_wrapper.EmptyRespond"
+                        }
+                    },
+                    "422": {
+                        "description": "UNPROCESSABLE ENTITY RESPOND",
+                        "schema": {
+                            "$ref": "#/definitions/karlota_aasumitro_id_internal_utils_http_wrapper.EmptyRespond"
+                        }
+                    },
+                    "500": {
+                        "description": "INTERNAL SERVER ERROR RESPOND",
+                        "schema": {
+                            "$ref": "#/definitions/karlota_aasumitro_id_internal_utils_http_wrapper.EmptyRespond"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/forgot-password": {
+            "post": {
+                "description": "Request tog get reset password link",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Forgot Password",
+                "parameters": [
+                    {
+                        "description": "form request to get forgot password link",
+                        "name": "form",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/karlota_aasumitro_id_internal_model_request.ForgotPasswordRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "CREATED RESPOND",
+                        "schema": {
+                            "$ref": "#/definitions/karlota_aasumitro_id_internal_utils_http_wrapper.EmptyRespond"
+                        }
+                    },
+                    "400": {
+                        "description": "BAD REQUEST RESPOND",
+                        "schema": {
+                            "$ref": "#/definitions/karlota_aasumitro_id_internal_utils_http_wrapper.EmptyRespond"
+                        }
+                    },
+                    "422": {
+                        "description": "UNPROCESSABLE ENTITY REQUEST RESPOND",
+                        "schema": {
+                            "$ref": "#/definitions/karlota_aasumitro_id_internal_utils_http_wrapper.EmptyRespond"
+                        }
+                    },
+                    "500": {
+                        "description": "INTERNAL SERVER ERROR RESPOND",
+                        "schema": {
+                            "$ref": "#/definitions/karlota_aasumitro_id_internal_utils_http_wrapper.EmptyRespond"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/login": {
+            "post": {
+                "description": "Login with email and password",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Log User In",
+                "parameters": [
+                    {
+                        "description": "form request for login",
+                        "name": "form",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/karlota_aasumitro_id_internal_model_request.LoginRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "CREATED RESPOND",
+                        "schema": {
+                            "$ref": "#/definitions/karlota_aasumitro_id_internal_utils_http_wrapper.EmptyRespond"
+                        }
+                    },
+                    "400": {
+                        "description": "BAD REQUEST RESPOND",
+                        "schema": {
+                            "$ref": "#/definitions/karlota_aasumitro_id_internal_utils_http_wrapper.EmptyRespond"
+                        }
+                    },
+                    "422": {
+                        "description": "UNPROCESSABLE ENTITY REQUEST RESPOND",
+                        "schema": {
+                            "$ref": "#/definitions/karlota_aasumitro_id_internal_utils_http_wrapper.EmptyRespond"
+                        }
+                    },
+                    "500": {
+                        "description": "INTERNAL SERVER ERROR RESPOND",
+                        "schema": {
+                            "$ref": "#/definitions/karlota_aasumitro_id_internal_utils_http_wrapper.EmptyRespond"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/refresh-token": {
+            "post": {
+                "description": "Do refresh token and get new access token",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Refresh User Session",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Refresh Token",
+                        "name": "X-REFRESH-TOKEN",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "CREATED RESPOND",
+                        "schema": {
+                            "$ref": "#/definitions/karlota_aasumitro_id_internal_utils_http_wrapper.EmptyRespond"
+                        }
+                    },
+                    "400": {
+                        "description": "BAD REQUEST RESPOND",
+                        "schema": {
+                            "$ref": "#/definitions/karlota_aasumitro_id_internal_utils_http_wrapper.EmptyRespond"
+                        }
+                    },
+                    "422": {
+                        "description": "UNPROCESSABLE ENTITY REQUEST RESPOND",
+                        "schema": {
+                            "$ref": "#/definitions/karlota_aasumitro_id_internal_utils_http_wrapper.EmptyRespond"
+                        }
+                    },
+                    "500": {
+                        "description": "INTERNAL SERVER ERROR RESPOND",
+                        "schema": {
+                            "$ref": "#/definitions/karlota_aasumitro_id_internal_utils_http_wrapper.EmptyRespond"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/register": {
+            "post": {
+                "description": "Create new user account and get access to the app",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Create new Account",
+                "parameters": [
+                    {
+                        "description": "form request to create an account",
+                        "name": "form",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/karlota_aasumitro_id_internal_model_request.RegisterRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "CREATED RESPOND",
+                        "schema": {
+                            "$ref": "#/definitions/karlota_aasumitro_id_internal_utils_http_wrapper.EmptyRespond"
+                        }
+                    },
+                    "400": {
+                        "description": "BAD REQUEST RESPOND",
+                        "schema": {
+                            "$ref": "#/definitions/karlota_aasumitro_id_internal_utils_http_wrapper.EmptyRespond"
+                        }
+                    },
+                    "422": {
+                        "description": "UNPROCESSABLE ENTITY REQUEST RESPOND",
+                        "schema": {
+                            "$ref": "#/definitions/karlota_aasumitro_id_internal_utils_http_wrapper.EmptyRespond"
+                        }
+                    },
+                    "500": {
+                        "description": "INTERNAL SERVER ERROR RESPOND",
+                        "schema": {
+                            "$ref": "#/definitions/karlota_aasumitro_id_internal_utils_http_wrapper.EmptyRespond"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/reset-password": {
+            "post": {
+                "description": "Set User new password after get reset password link",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Set New Password",
+                "parameters": [
+                    {
+                        "description": "form request to set new user password",
+                        "name": "form",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/karlota_aasumitro_id_internal_model_request.ResetPasswordRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "CREATED RESPOND",
+                        "schema": {
+                            "$ref": "#/definitions/karlota_aasumitro_id_internal_utils_http_wrapper.EmptyRespond"
+                        }
+                    },
+                    "400": {
+                        "description": "BAD REQUEST RESPOND",
+                        "schema": {
+                            "$ref": "#/definitions/karlota_aasumitro_id_internal_utils_http_wrapper.EmptyRespond"
+                        }
+                    },
+                    "422": {
+                        "description": "UNPROCESSABLE ENTITY REQUEST RESPOND",
+                        "schema": {
+                            "$ref": "#/definitions/karlota_aasumitro_id_internal_utils_http_wrapper.EmptyRespond"
+                        }
+                    },
+                    "500": {
+                        "description": "INTERNAL SERVER ERROR RESPOND",
+                        "schema": {
+                            "$ref": "#/definitions/karlota_aasumitro_id_internal_utils_http_wrapper.EmptyRespond"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/verify-email": {
+            "get": {
+                "description": "Verify user email via given link",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Verify User Email",
+                "responses": {
+                    "201": {
+                        "description": "CREATED RESPOND",
+                        "schema": {
+                            "$ref": "#/definitions/karlota_aasumitro_id_internal_utils_http_wrapper.EmptyRespond"
+                        }
+                    },
+                    "400": {
+                        "description": "BAD REQUEST RESPOND",
+                        "schema": {
+                            "$ref": "#/definitions/karlota_aasumitro_id_internal_utils_http_wrapper.EmptyRespond"
+                        }
+                    },
+                    "422": {
+                        "description": "UNPROCESSABLE ENTITY REQUEST RESPOND",
+                        "schema": {
+                            "$ref": "#/definitions/karlota_aasumitro_id_internal_utils_http_wrapper.EmptyRespond"
+                        }
+                    },
+                    "500": {
+                        "description": "INTERNAL SERVER ERROR RESPOND",
+                        "schema": {
+                            "$ref": "#/definitions/karlota_aasumitro_id_internal_utils_http_wrapper.EmptyRespond"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "karlota_aasumitro_id_internal_model_request.ForgotPasswordRequest": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                }
+            }
+        },
+        "karlota_aasumitro_id_internal_model_request.LoginRequest": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "karlota_aasumitro_id_internal_model_request.RegisterRequest": {
+            "type": "object",
+            "properties": {
+                "display_name": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "karlota_aasumitro_id_internal_model_request.ResetPasswordRequest": {
+            "type": "object",
+            "properties": {
+                "confirm_password": {
+                    "type": "string"
+                },
+                "exchange_token": {
+                    "type": "string"
+                },
+                "new_password": {
+                    "type": "string"
+                }
+            }
+        },
+        "karlota_aasumitro_id_internal_model_request.UpdateAccountRequest": {
+            "type": "object",
+            "properties": {
+                "display_name": {
+                    "type": "string"
+                }
+            }
+        },
+        "karlota_aasumitro_id_internal_model_request.UpdatePasswordRequest": {
+            "type": "object",
+            "properties": {
+                "new_password": {
+                    "type": "string"
+                },
+                "old_password": {
+                    "type": "string"
+                }
+            }
+        },
+        "karlota_aasumitro_id_internal_utils_http_wrapper.EmptyRespond": {
+            "type": "object"
+        }
+    },
+    "securityDefinitions": {
+        "ApiKeyAuth": {
+            "description": "Add you JWT here; e.g: Bearer {JWT}",
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        }
+    }
+}

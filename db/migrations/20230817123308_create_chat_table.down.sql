@@ -1,0 +1,4 @@
+DROP VIEW IF EXISTS user_chats;
+DROP TABLE IF EXISTS participants;
+DROP TABLE IF EXISTS messages;
+DROP TABLE IF EXISTS conversations;

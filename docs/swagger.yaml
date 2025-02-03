@@ -1,0 +1,353 @@
+definitions:
+  karlota_aasumitro_id_internal_model_request.ForgotPasswordRequest:
+    properties:
+      email:
+        type: string
+    type: object
+  karlota_aasumitro_id_internal_model_request.LoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  karlota_aasumitro_id_internal_model_request.RegisterRequest:
+    properties:
+      display_name:
+        type: string
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  karlota_aasumitro_id_internal_model_request.ResetPasswordRequest:
+    properties:
+      confirm_password:
+        type: string
+      exchange_token:
+        type: string
+      new_password:
+        type: string
+    type: object
+  karlota_aasumitro_id_internal_model_request.UpdateAccountRequest:
+    properties:
+      display_name:
+        type: string
+    type: object
+  karlota_aasumitro_id_internal_model_request.UpdatePasswordRequest:
+    properties:
+      new_password:
+        type: string
+      old_password:
+        type: string
+    type: object
+  karlota_aasumitro_id_internal_utils_http_wrapper.EmptyRespond:
+    type: object
+info:
+  contact:
+    email: hello@aasumitro.id
+    name: '@aasumitro'
+    url: https://aasumitro.id/
+  description: Karlota REST API Documentation
+  title: KARLOTA MESSENGER
+  version: 0.0.1-dev
+paths:
+  /api/v1/account:
+    get:
+      consumes:
+      - application/json
+      description: Get User Profile
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: CREATED RESPOND
+          schema:
+            $ref: '#/definitions/karlota_aasumitro_id_internal_utils_http_wrapper.EmptyRespond'
+        "400":
+          description: BAD REQUEST RESPOND
+          schema:
+            $ref: '#/definitions/karlota_aasumitro_id_internal_utils_http_wrapper.EmptyRespond'
+        "500":
+          description: INTERNAL SERVER ERROR RESPOND
+          schema:
+            $ref: '#/definitions/karlota_aasumitro_id_internal_utils_http_wrapper.EmptyRespond'
+      security:
+      - ApiKeyAuth: []
+      summary: User Profile
+      tags:
+      - Account
+    patch:
+      consumes:
+      - application/json
+      description: Update user display name
+      parameters:
+      - description: form request for login
+        in: body
+        name: form
+        required: true
+        schema:
+          $ref: '#/definitions/karlota_aasumitro_id_internal_model_request.UpdateAccountRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK RESPOND
+          schema:
+            $ref: '#/definitions/karlota_aasumitro_id_internal_utils_http_wrapper.EmptyRespond'
+        "400":
+          description: BAD REQUEST RESPOND
+          schema:
+            $ref: '#/definitions/karlota_aasumitro_id_internal_utils_http_wrapper.EmptyRespond'
+        "422":
+          description: UNPROCESSABLE ENTITY RESPOND
+          schema:
+            $ref: '#/definitions/karlota_aasumitro_id_internal_utils_http_wrapper.EmptyRespond'
+        "500":
+          description: INTERNAL SERVER ERROR RESPOND
+          schema:
+            $ref: '#/definitions/karlota_aasumitro_id_internal_utils_http_wrapper.EmptyRespond'
+      security:
+      - ApiKeyAuth: []
+      summary: User Update Name
+      tags:
+      - Account
+  /api/v1/account/password:
+    patch:
+      consumes:
+      - application/json
+      description: Update user password
+      parameters:
+      - description: form request for login
+        in: body
+        name: form
+        required: true
+        schema:
+          $ref: '#/definitions/karlota_aasumitro_id_internal_model_request.UpdatePasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: CREATED RESPOND
+          schema:
+            $ref: '#/definitions/karlota_aasumitro_id_internal_utils_http_wrapper.EmptyRespond'
+        "400":
+          description: BAD REQUEST RESPOND
+          schema:
+            $ref: '#/definitions/karlota_aasumitro_id_internal_utils_http_wrapper.EmptyRespond'
+        "422":
+          description: UNPROCESSABLE ENTITY RESPOND
+          schema:
+            $ref: '#/definitions/karlota_aasumitro_id_internal_utils_http_wrapper.EmptyRespond'
+        "500":
+          description: INTERNAL SERVER ERROR RESPOND
+          schema:
+            $ref: '#/definitions/karlota_aasumitro_id_internal_utils_http_wrapper.EmptyRespond'
+      security:
+      - ApiKeyAuth: []
+      summary: User Update Password
+      tags:
+      - Account
+  /api/v1/auth/forgot-password:
+    post:
+      consumes:
+      - application/json
+      description: Request tog get reset password link
+      parameters:
+      - description: form request to get forgot password link
+        in: body
+        name: form
+        required: true
+        schema:
+          $ref: '#/definitions/karlota_aasumitro_id_internal_model_request.ForgotPasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: CREATED RESPOND
+          schema:
+            $ref: '#/definitions/karlota_aasumitro_id_internal_utils_http_wrapper.EmptyRespond'
+        "400":
+          description: BAD REQUEST RESPOND
+          schema:
+            $ref: '#/definitions/karlota_aasumitro_id_internal_utils_http_wrapper.EmptyRespond'
+        "422":
+          description: UNPROCESSABLE ENTITY REQUEST RESPOND
+          schema:
+            $ref: '#/definitions/karlota_aasumitro_id_internal_utils_http_wrapper.EmptyRespond'
+        "500":
+          description: INTERNAL SERVER ERROR RESPOND
+          schema:
+            $ref: '#/definitions/karlota_aasumitro_id_internal_utils_http_wrapper.EmptyRespond'
+      summary: Forgot Password
+      tags:
+      - Auth
+  /api/v1/auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Login with email and password
+      parameters:
+      - description: form request for login
+        in: body
+        name: form
+        required: true
+        schema:
+          $ref: '#/definitions/karlota_aasumitro_id_internal_model_request.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: CREATED RESPOND
+          schema:
+            $ref: '#/definitions/karlota_aasumitro_id_internal_utils_http_wrapper.EmptyRespond'
+        "400":
+          description: BAD REQUEST RESPOND
+          schema:
+            $ref: '#/definitions/karlota_aasumitro_id_internal_utils_http_wrapper.EmptyRespond'
+        "422":
+          description: UNPROCESSABLE ENTITY REQUEST RESPOND
+          schema:
+            $ref: '#/definitions/karlota_aasumitro_id_internal_utils_http_wrapper.EmptyRespond'
+        "500":
+          description: INTERNAL SERVER ERROR RESPOND
+          schema:
+            $ref: '#/definitions/karlota_aasumitro_id_internal_utils_http_wrapper.EmptyRespond'
+      summary: Log User In
+      tags:
+      - Auth
+  /api/v1/auth/refresh-token:
+    post:
+      consumes:
+      - application/json
+      description: Do refresh token and get new access token
+      parameters:
+      - description: Refresh Token
+        in: header
+        name: X-REFRESH-TOKEN
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: CREATED RESPOND
+          schema:
+            $ref: '#/definitions/karlota_aasumitro_id_internal_utils_http_wrapper.EmptyRespond'
+        "400":
+          description: BAD REQUEST RESPOND
+          schema:
+            $ref: '#/definitions/karlota_aasumitro_id_internal_utils_http_wrapper.EmptyRespond'
+        "422":
+          description: UNPROCESSABLE ENTITY REQUEST RESPOND
+          schema:
+            $ref: '#/definitions/karlota_aasumitro_id_internal_utils_http_wrapper.EmptyRespond'
+        "500":
+          description: INTERNAL SERVER ERROR RESPOND
+          schema:
+            $ref: '#/definitions/karlota_aasumitro_id_internal_utils_http_wrapper.EmptyRespond'
+      summary: Refresh User Session
+      tags:
+      - Auth
+  /api/v1/auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Create new user account and get access to the app
+      parameters:
+      - description: form request to create an account
+        in: body
+        name: form
+        required: true
+        schema:
+          $ref: '#/definitions/karlota_aasumitro_id_internal_model_request.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: CREATED RESPOND
+          schema:
+            $ref: '#/definitions/karlota_aasumitro_id_internal_utils_http_wrapper.EmptyRespond'
+        "400":
+          description: BAD REQUEST RESPOND
+          schema:
+            $ref: '#/definitions/karlota_aasumitro_id_internal_utils_http_wrapper.EmptyRespond'
+        "422":
+          description: UNPROCESSABLE ENTITY REQUEST RESPOND
+          schema:
+            $ref: '#/definitions/karlota_aasumitro_id_internal_utils_http_wrapper.EmptyRespond'
+        "500":
+          description: INTERNAL SERVER ERROR RESPOND
+          schema:
+            $ref: '#/definitions/karlota_aasumitro_id_internal_utils_http_wrapper.EmptyRespond'
+      summary: Create new Account
+      tags:
+      - Auth
+  /api/v1/auth/reset-password:
+    post:
+      consumes:
+      - application/json
+      description: Set User new password after get reset password link
+      parameters:
+      - description: form request to set new user password
+        in: body
+        name: form
+        required: true
+        schema:
+          $ref: '#/definitions/karlota_aasumitro_id_internal_model_request.ResetPasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: CREATED RESPOND
+          schema:
+            $ref: '#/definitions/karlota_aasumitro_id_internal_utils_http_wrapper.EmptyRespond'
+        "400":
+          description: BAD REQUEST RESPOND
+          schema:
+            $ref: '#/definitions/karlota_aasumitro_id_internal_utils_http_wrapper.EmptyRespond'
+        "422":
+          description: UNPROCESSABLE ENTITY REQUEST RESPOND
+          schema:
+            $ref: '#/definitions/karlota_aasumitro_id_internal_utils_http_wrapper.EmptyRespond'
+        "500":
+          description: INTERNAL SERVER ERROR RESPOND
+          schema:
+            $ref: '#/definitions/karlota_aasumitro_id_internal_utils_http_wrapper.EmptyRespond'
+      summary: Set New Password
+      tags:
+      - Auth
+  /api/v1/auth/verify-email:
+    get:
+      consumes:
+      - application/json
+      description: Verify user email via given link
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: CREATED RESPOND
+          schema:
+            $ref: '#/definitions/karlota_aasumitro_id_internal_utils_http_wrapper.EmptyRespond'
+        "400":
+          description: BAD REQUEST RESPOND
+          schema:
+            $ref: '#/definitions/karlota_aasumitro_id_internal_utils_http_wrapper.EmptyRespond'
+        "422":
+          description: UNPROCESSABLE ENTITY REQUEST RESPOND
+          schema:
+            $ref: '#/definitions/karlota_aasumitro_id_internal_utils_http_wrapper.EmptyRespond'
+        "500":
+          description: INTERNAL SERVER ERROR RESPOND
+          schema:
+            $ref: '#/definitions/karlota_aasumitro_id_internal_utils_http_wrapper.EmptyRespond'
+      summary: Verify User Email
+      tags:
+      - Auth
+securityDefinitions:
+  ApiKeyAuth:
+    description: 'Add you JWT here; e.g: Bearer {JWT}'
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
