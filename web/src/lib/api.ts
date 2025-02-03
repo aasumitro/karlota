@@ -123,8 +123,7 @@ api.interceptors.request.use(async  (config) => {
         auth.setUser(user as Profile);
         config.headers.Authorization = `Bearer ${access_token.str}`;
       }
-    } catch (error) {
-      console.error("Error refreshing token:", error);
+    } catch {
       auth.reset();
     }
   }

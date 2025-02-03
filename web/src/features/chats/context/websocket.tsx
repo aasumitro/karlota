@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, {createContext, useContext, useEffect, useCallback, useRef} from "react";
 import { Chat, Message } from "@/types/chat";
 import { useChatStore } from "@/states/chat-store";
@@ -47,18 +48,15 @@ export const WebSocketProvider = ({ children }: { children: React.ReactNode }) =
           setMessages(callback.data as Message[]);
           break;
         case "online_status":
-          const data = callback.data
-          setOnlineStatus(data.user as Profile, data.conversation_id as number)
+          setOnlineStatus(callback.data.user as Profile, callback.data.conversation_id as number)
           break;
         case "typing":
-          setState(`typing_${callback.data.conversation_id}`,
-            callback.data.status as boolean)
+          setState(`typing_${callback.data.conversation_id}`, callback.data.status as boolean)
           break;
         case "new_message":
           setNewMessage(callback.data as Message);
           break;
         default:
-          console.warn("Unknown WebSocket event:", callback);
           break;
       }
     };

@@ -45,11 +45,7 @@ export function ResetPasswordForm({ className, ...props }: ResetFormProps) {
   const queryParams = new URLSearchParams(location.search);
   const exchangeToken = queryParams.get('exchange_token');
   const navigate = useNavigate();
-  let [openModal, setOpenModal] = useState(false);
-
-  if (!exchangeToken) {
-    return ;
-  }
+  const [openModal, setOpenModal] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -82,7 +78,7 @@ export function ResetPasswordForm({ className, ...props }: ResetFormProps) {
             <FormField
               control={form.control}
               name='new_password'
-              render={({ field }) => (
+              render={({field}) => (
                 <FormItem className='space-y-2'>
                   <FormLabel>Password</FormLabel>
                   <FormControl>
