@@ -103,8 +103,8 @@ var migrateSeedCmd = &cobra.Command{
 
 		now := time.Now()
 		for _, user := range users {
-			h := security.PasswordHash{Stored: "", Supplied: "Test@1234"}
-			pwd, err := h.MakePassword(security.Parallelization)
+			h := security.PasswordHashArgon2{Stored: "", Supplied: "Test@1234"}
+			pwd, err := h.MakePassword()
 			if err != nil {
 				log.Fatalf("failed to insert user %s: %v", user, err)
 			}

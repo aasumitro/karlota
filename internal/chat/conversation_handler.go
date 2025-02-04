@@ -124,20 +124,26 @@ func (h *conversationHandler) watchActionRequest(
 		}
 		// proceed action
 		switch payload.Action {
+		// messaging
 		case "chats":
 			h.chats(ctx, &payload)
 		case "messages":
 			h.messages(ctx, &payload)
 		case "online_status":
 			h.onlineStatus(&payload)
-		case "typing":
-			h.typing(&payload)
+		case "typing_state":
+			h.typingState(&payload)
 		case "new_text_message":
 			h.newTextMessage(ctx, &payload)
 		case "delete_group":
 			h.deleteGroup(ctx, &payload)
 		case "leave_group":
 			h.leaveGroup(ctx, &payload)
+		// voice call
+		case "voip_start_call":
+		case "voip_offer":
+		case "voip_answer":
+		case "voip_ice_candidate":
 		}
 	}
 }
@@ -227,13 +233,13 @@ func (h *conversationHandler) onlineStatus(
 }
 
 // typing handler that is triggered when a user trying to type something
-func (h *conversationHandler) typing(payload *request.WebsocketPayload) {
+func (h *conversationHandler) typingState(payload *request.WebsocketPayload) {
 	if err := payload.ValidateTypingRequest(); err != nil {
 		h.reply("error", payload.UserID, err)
 		return
 	}
 	h.broadcast(payload.RecipientID, func(recipientID uint) {
-		h.reply("typing", recipientID, map[string]interface{}{
+		h.reply("typing_state", recipientID, map[string]interface{}{
 			"conversation_id": payload.ConversationID,
 			"status":          payload.TypingStatus,
 		})
@@ -253,7 +259,7 @@ func (h *conversationHandler) newTextMessage(
 		return
 	}
 	h.broadcast(payload.RecipientID, func(recipientID uint) {
-		h.reply("typing", recipientID, map[string]interface{}{
+		h.reply("typing_state", recipientID, map[string]interface{}{
 			"conversation_id": payload.ConversationID,
 			"status":          false,
 		})

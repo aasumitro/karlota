@@ -28,7 +28,7 @@ export function ChatForm() {
       if (inputValue && !isTyping) {
         setIsTyping(true);
         const userIds = getUserIds(selectedChat);
-        sendMessage({ action: "typing", conversation_id: selectedChat.id, recipient_id: userIds, typing_status: true });
+        sendMessage({ action: "typing_state", conversation_id: selectedChat.id, recipient_id: userIds, typing_status: true });
       }
 
       // Clear any existing timeout
@@ -40,7 +40,7 @@ export function ChatForm() {
       const newTimeout = setTimeout(() => {
         setIsTyping(false); // Typing ended
         const userIds = getUserIds(selectedChat);
-        sendMessage({ action: "typing", conversation_id: selectedChat.id, recipient_id: userIds, typing_status: false });
+        sendMessage({ action: "typing_state", conversation_id: selectedChat.id, recipient_id: userIds, typing_status: false });
       }, 1000); // Typing ended after 1 second of inactivity
       setTypingTimeout(newTimeout);
     }

@@ -73,8 +73,8 @@ func (u *User) FromResponse(user *User) interface{} {
 func (u *User) MakeNewUser(body request.RegisterRequest) error {
 	u.DisplayName = body.DisplayName
 	u.Email = body.Email
-	h := security.PasswordHash{Stored: "", Supplied: body.Password}
-	pwd, err := h.MakePassword(security.Parallelization)
+	h := security.PasswordHashArgon2{Stored: "", Supplied: body.Password}
+	pwd, err := h.MakePassword()
 	if err != nil {
 		return err
 	}
@@ -85,8 +85,8 @@ func (u *User) MakeNewUser(body request.RegisterRequest) error {
 }
 
 func (u *User) MakeNewPassword(newPassword string) error {
-	h := security.PasswordHash{Stored: "", Supplied: newPassword}
-	pwd, err := h.MakePassword(security.Parallelization)
+	h := security.PasswordHashArgon2{Stored: "", Supplied: newPassword}
+	pwd, err := h.MakePassword()
 	if err != nil {
 		return err
 	}
@@ -98,8 +98,8 @@ func (u *User) MakeNewPassword(newPassword string) error {
 }
 
 func (u *User) ValidatePassword(pwd string) error {
-	h := security.PasswordHash{Stored: u.Password, Supplied: pwd}
-	isValid, err := h.ComparePassword(security.Parallelization)
+	h := security.PasswordHashArgon2{Stored: u.Password, Supplied: pwd}
+	isValid, err := h.ComparePassword()
 	if err != nil {
 		return err
 	}

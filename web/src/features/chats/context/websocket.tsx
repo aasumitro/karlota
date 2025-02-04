@@ -50,7 +50,7 @@ export const WebSocketProvider = ({ children }: { children: React.ReactNode }) =
         case "online_status":
           setOnlineStatus(callback.data.user as Profile, callback.data.conversation_id as number)
           break;
-        case "typing":
+        case "typing_state":
           setState(`typing_${callback.data.conversation_id}`, callback.data.status as boolean)
           break;
         case "new_message":
