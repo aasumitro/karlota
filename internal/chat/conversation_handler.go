@@ -113,31 +113,31 @@ func (h *conversationHandler) watchActionRequest(
 		// call the specified function and do the action
 		var payload request.WebsocketPayload
 		if err := json.Unmarshal(message, &payload); err != nil {
-			log.Println("failed to unmarshal websocket payload:", err)
+			log.Println("failed to unmarshal WSAction payload:", err)
 			continue
 		}
 		payload.UserID = uid
 		payload.UserDN = udn
 		if err := payload.ValidateActionRequest(); err != nil {
-			log.Println("failed to validate websocket payload:", err)
+			log.Println("failed to validate WSAction payload:", err)
 			continue
 		}
 		// proceed action
 		switch payload.Action {
 		// messaging
-		case "chats":
+		case common.WSEventActionChats:
 			h.chats(ctx, &payload)
-		case "messages":
+		case common.WSEventActionChatMessages:
 			h.messages(ctx, &payload)
-		case "online_status":
+		case common.WSEventActionUserOnlineStatus:
 			h.onlineStatus(&payload)
-		case "typing_state":
+		case common.WSEventActionUserTypingState:
 			h.typingState(&payload)
-		case "new_text_message":
+		case common.WSEventActionNewTextMessage:
 			h.newTextMessage(ctx, &payload)
-		case "delete_group":
+		case common.WSEventActionDeleteGroup:
 			h.deleteGroup(ctx, &payload)
-		case "leave_group":
+		case common.WSEventActionLeaveGroup:
 			h.leaveGroup(ctx, &payload)
 		// voice call
 		case "voip_start_call":
@@ -159,6 +159,8 @@ func (h *conversationHandler) addWSClient(
 	lastOnlineKey := fmt.Sprintf("%s%d", common.LastOnlineKeyState, userID)
 	cache.Instance().Set(onlineStatusKey, true, cache.NoExpiration)
 	cache.Instance().Set(lastOnlineKey, time.Now().Unix(), cache.NoExpiration)
+	// check notify from queue table and sent to user when online
+	h.dequeueNotify(userID)
 }
 
 func (h *conversationHandler) delWSClient(userID uint) {
@@ -166,7 +168,7 @@ func (h *conversationHandler) delWSClient(userID uint) {
 	defer h.mu.Unlock()
 	if conn, ok := h.wsc[userID]; ok {
 		if err := conn.Close(); err != nil {
-			log.Printf("Failed to close WebSocket connection for user %d: %v", userID, err)
+			log.Printf("Failed to close WSConn for user %d: %v", userID, err)
 		}
 		delete(h.wsc, userID)
 		// set user online
@@ -181,10 +183,10 @@ func (h *conversationHandler) chats(
 ) {
 	chats, err := h.srv.Chats(ctx, payload.UserID)
 	if err != nil {
-		h.reply("error", payload.UserID, err.Error())
+		h.reply(common.WSEventCallbackErr, payload.UserID, err.Error())
 		return
 	}
-	h.reply("chats", payload.UserID, chats)
+	h.reply(common.WSEventCallbackChats, payload.UserID, chats)
 }
 
 // messages handler that is when user try to get the conversation detail
@@ -192,22 +194,20 @@ func (h *conversationHandler) messages(
 	ctx context.Context, payload *request.WebsocketPayload,
 ) {
 	if err := payload.ValidateConversationIDRequest(); err != nil {
-		h.reply("error", payload.UserID, err)
+		h.reply(common.WSEventCallbackErr, payload.UserID, err)
 		return
 	}
 	messages, err := h.srv.Messages(ctx, payload.ConversationID)
 	if err != nil {
-		h.reply("error", payload.UserID, err.Error())
+		h.reply(common.WSEventCallbackErr, payload.UserID, err.Error())
 		return
 	}
-	h.reply("messages", payload.UserID, messages)
+	h.reply(common.WSEventCallbackChatMessages, payload.UserID, messages)
 }
 
-func (h *conversationHandler) onlineStatus(
-	payload *request.WebsocketPayload,
-) {
+func (h *conversationHandler) onlineStatus(payload *request.WebsocketPayload) {
 	if err := payload.ValidateOnlineStatusRequest(); err != nil {
-		h.reply("error", payload.UserID, err)
+		h.reply(common.WSEventCallbackErr, payload.UserID, err)
 		return
 	}
 	if payload.TargetID == 0 {
@@ -226,23 +226,19 @@ func (h *conversationHandler) onlineStatus(
 			user.LastOnline = lastOnlineValue
 		}
 	}
-	h.reply("online_status", payload.UserID, map[string]interface{}{
-		"user":            user,
-		"conversation_id": payload.ConversationID,
-	})
+	h.reply(common.WSEventCallbackOnlineStatus, payload.UserID, map[string]interface{}{
+		"user": user, "conversation_id": payload.ConversationID})
 }
 
 // typing handler that is triggered when a user trying to type something
 func (h *conversationHandler) typingState(payload *request.WebsocketPayload) {
 	if err := payload.ValidateTypingRequest(); err != nil {
-		h.reply("error", payload.UserID, err)
+		h.reply(common.WSEventCallbackErr, payload.UserID, err)
 		return
 	}
 	h.broadcast(payload.RecipientID, func(recipientID uint) {
-		h.reply("typing_state", recipientID, map[string]interface{}{
-			"conversation_id": payload.ConversationID,
-			"status":          payload.TypingStatus,
-		})
+		h.reply(common.WSEventCallbackTypingState, recipientID, map[string]interface{}{
+			"conversation_id": payload.ConversationID, "status": payload.TypingStatus})
 	})
 }
 
@@ -250,20 +246,18 @@ func (h *conversationHandler) newTextMessage(
 	ctx context.Context, payload *request.WebsocketPayload,
 ) {
 	if err := payload.ValidateNewMessageRequest(); err != nil {
-		h.reply("error", payload.UserID, err)
+		h.reply(common.WSEventCallbackErr, payload.UserID, err)
 		return
 	}
 	message, err := h.srv.NewTextMessage(ctx, payload)
 	if err != nil {
-		h.reply("error", payload.UserID, err.Error())
+		h.reply(common.WSEventCallbackErr, payload.UserID, err.Error())
 		return
 	}
 	h.broadcast(payload.RecipientID, func(recipientID uint) {
-		h.reply("typing_state", recipientID, map[string]interface{}{
-			"conversation_id": payload.ConversationID,
-			"status":          false,
-		})
-		h.reply("new_message", recipientID, message)
+		h.reply(common.WSEventCallbackTypingState, recipientID, map[string]interface{}{
+			"conversation_id": payload.ConversationID, "status": false})
+		h.reply(common.WSEventCallbackNewMessage, recipientID, message)
 	})
 }
 
@@ -271,11 +265,11 @@ func (h *conversationHandler) deleteGroup(
 	ctx context.Context, payload *request.WebsocketPayload,
 ) {
 	if err := payload.ValidateConversationIDRequest(); err != nil {
-		h.reply("error", payload.UserID, err)
+		h.reply(common.WSEventCallbackErr, payload.UserID, err)
 		return
 	}
 	if err := h.srv.RequestDeleteGroup(ctx, payload); err != nil {
-		h.reply("error", payload.UserID, err.Error())
+		h.reply(common.WSEventCallbackErr, payload.UserID, err.Error())
 	}
 }
 
@@ -283,20 +277,20 @@ func (h *conversationHandler) leaveGroup(
 	ctx context.Context, payload *request.WebsocketPayload,
 ) {
 	if err := payload.ValidateConversationIDRequest(); err != nil {
-		h.reply("error", payload.UserID, err)
+		h.reply(common.WSEventCallbackErr, payload.UserID, err)
 		return
 	}
 	message, err := h.srv.RequestLeaveGroup(ctx, payload)
 	if err != nil {
-		h.reply("error", payload.UserID, err)
+		h.reply(common.WSEventCallbackErr, payload.UserID, err)
 		return
 	}
 	if message == nil {
 		return
 	}
 	h.broadcast(payload.RecipientID, func(recipientID uint) {
-		h.reply("new_message", recipientID, message)
-		h.reply("refresh_chat", recipientID, "")
+		h.reply(common.WSEventCallbackNewMessage, recipientID, message)
+		h.reply(common.WSEventCallbackRefreshChat, recipientID, "")
 	})
 }
 
@@ -334,6 +328,7 @@ func (h *conversationHandler) reply(replyType string, userID uint, data any) {
 	conn, ok := h.wsc[userID]
 	h.mu.Unlock()
 	if !ok {
+		h.enqueueNotify(replyType, userID, data)
 		log.Printf("No connection found to reply to user %d", userID)
 		return
 	}
@@ -355,6 +350,14 @@ func (h *conversationHandler) reply(replyType string, userID uint, data any) {
 	}
 }
 
+func (h *conversationHandler) enqueueNotify(replyType string, userID uint, data any) {
+	fmt.Println(replyType, userID, data)
+}
+
+func (h *conversationHandler) dequeueNotify(userID uint) {
+	fmt.Println(userID)
+}
+
 func NewConversationHandler(
 	router gin.IRoutes,
 	service IConversationService,
@@ -363,5 +366,5 @@ func NewConversationHandler(
 	handler := &conversationHandler{srv: service, rmq: rabbitMQ,
 		wsc: make(map[uint]*websocket.Conn)}
 	router.POST(common.EmptyPath, middleware.Auth(), handler.add)
-	router.GET(common.EmptyPath, middleware.WSAuth(), handler.interact) // websocket
+	router.GET(common.EmptyPath, middleware.WSAuth(), handler.interact)
 }

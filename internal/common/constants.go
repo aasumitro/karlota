@@ -33,3 +33,25 @@ const (
 	MessageTypeVoIP  = "voice_call"
 	MessageTypeVC    = "video_call"
 )
+
+const (
+	WSEventActionChats            = "chats"
+	WSEventActionChatMessages     = "messages"
+	WSEventActionUserOnlineStatus = "online_status"
+	WSEventActionUserTypingState  = "typing_state"
+	WSEventActionNewTextMessage   = "new_text_message"
+	WSEventActionDeleteGroup      = "delete_group"
+	WSEventActionLeaveGroup       = "leave_group"
+	// ...
+)
+
+const (
+	WSEventCallbackErr          = "error"
+	WSEventCallbackChats        = "chats"
+	WSEventCallbackChatMessages = "messages"
+	WSEventCallbackOnlineStatus = "online_status"
+	WSEventCallbackTypingState  = "typing_state"
+	WSEventCallbackNewMessage   = "new_message"
+	WSEventCallbackRefreshChat  = "refresh_chat"
+	// ...
+)
