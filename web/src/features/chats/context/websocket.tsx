@@ -1,19 +1,25 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import React, {createContext, useContext, useEffect, useCallback, useRef} from "react";
-import { Chat, Message } from "@/types/chat";
+/* eslint-disable @typescript-eslint/no-explicit-any,react-hooks/exhaustive-deps */
+import {createContext, useContext, useEffect, useCallback, useRef, ReactNode} from "react";
+import {CallStage, Chat, Message} from "@/types/chat";
 import { useChatStore } from "@/states/chat-store";
 import { isJsonString } from "@/lib/utils";
 import { API_ENDPOINT } from "@/lib/api";
 import {useGlobalActionStore} from "@/states/global-action-store";
 import {ChatListState} from "@/features/chats/components/chat-list";
-import {toast} from "@/hooks/use-toast";
-import {Profile} from "@/types/user.ts";
+import {Profile} from "@/types/user";
+import {IncomingCallModalState} from "@/features/chats/components/incoming-call";
+import {NewCallState} from "@/features/chats/components/new-call";
+// import {toast} from "@/hooks/use-toast";
 
-const WebSocketContext = createContext<any>(null);
+interface WebSocketContext {
+  sendMessage: (payload: any) => void;
+}
 
-export const WebSocketProvider = ({ children }: { children: React.ReactNode }) => {
-  const { setChats, setMessages, setNewMessage, setOnlineStatus } = useChatStore();
-  const { setState } = useGlobalActionStore();
+const WebSocketContext = createContext<WebSocketContext | null>(null);
+
+export const WebSocketProvider = ({ children }: { children: ReactNode }) => {
+  const { setChats, setMessages, setNewMessage, setOnlineStatus, setCall } = useChatStore();
+  const { setState,setStatus } = useGlobalActionStore();
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimer = useRef<NodeJS.Timeout | null>(null);
 
@@ -34,7 +40,8 @@ export const WebSocketProvider = ({ children }: { children: React.ReactNode }) =
 
       switch (callback.type) {
         case "error":
-          toast({variant: 'destructive', title: callback.data})
+          // toast({variant: 'destructive', title: callback.data})
+          console.log("error callback", callback.data)
           break;
         case "chats":
           setChats(callback.data as Chat[]);
@@ -56,16 +63,26 @@ export const WebSocketProvider = ({ children }: { children: React.ReactNode }) =
         case "new_message":
           setNewMessage(callback.data as Message);
           break;
+        case "incoming_call":
+          // TODO: fix
+          setCall({vc_type: callback.data.type, vc_data: callback.data.payload,
+            vc_action: callback.data.action, vc_caller: callback.data.recipient})
+          setState(IncomingCallModalState, true)
+          break;
+        case "answer_call":
+          // TODO: FIx
+          setStatus(NewCallState, callback.data.action as CallStage)
+          break;
         default:
           break;
       }
     };
 
     wsRef.current.onclose = () => {
+      if (wsRef.current?.readyState !== WebSocket.CLOSED) return;
       wsRef.current = null;
-      if (!reconnectTimer.current) {
-        reconnectTimer.current = setTimeout(connectWebSocket, 3000); // Reconnect after 3 seconds
-      }
+      if (reconnectTimer.current) clearTimeout(reconnectTimer.current);
+      if (!reconnectTimer.current) reconnectTimer.current = setTimeout(connectWebSocket, 3000);
     };
   }, []);
 
@@ -96,6 +113,7 @@ export const WebSocketProvider = ({ children }: { children: React.ReactNode }) =
   );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useWebSocket = () => {
   const context = useContext(WebSocketContext);
   if (!context) {

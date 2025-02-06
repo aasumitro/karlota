@@ -20,6 +20,10 @@ import {ProfileInfoModalState} from "@/components/profile-info-modal";
 import {useSelectActionStore} from "@/states/select-action-store";
 import {Profile} from "@/types/user";
 import {DeleteGroupModalState} from "@/features/chats/components/delete-group-modal";
+import {NewCallModalState, NewCallState} from "@/features/chats/components/new-call";
+import {CallStage} from "@/types/chat";
+
+// TODO: watch this out
 
 export function ChatToolbar() {
   const sessionID = useAuthStore.getState().auth.user?.id;
@@ -28,7 +32,7 @@ export function ChatToolbar() {
   const [description, setDescription] = useState("")
   const [currentUser, setCurrentUser] = useState<Profile | null>(null)
   const [otherUser, setOtherUser] = useState<Profile | null>(null)
-  const {setState} = useGlobalActionStore();
+  const {setState, setStatus} = useGlobalActionStore();
   const { setUser } = useSelectActionStore();
 
   const notSupportedToast = () => {
@@ -111,7 +115,26 @@ export function ChatToolbar() {
           size='icon'
           variant='ghost'
           className='hidden size-8 rounded-full sm:inline-flex lg:size-10'
-          onClick={notSupportedToast}
+          onClick={() => {
+            setState(NewCallModalState, true)
+            setStatus(NewCallState, CallStage.Calling)
+            // createConnection((candidate: RTCIceCandidate | null) => {
+            //   sendMessage({
+            //     action: "ice_candidate",
+            //     recipient_id: [otherUser?.id],
+            //     vc_type: "video_audio",
+            //     vc_data: candidate
+            //   })
+            // })
+            // createOffer((offer: RTCSessionDescriptionInit) => sendMessage({
+            //   action: "start_call",
+            //   recipient_id: [otherUser?.id],
+            //   vc_type: "video_audio",
+            //   vc_data: offer
+            // }))
+            // TODO open modal and wait until user answer it
+            // if not show call failed and close button
+          }}
         >
           <IconVideo size={22} className='stroke-muted-foreground' />
         </Button>}
@@ -119,7 +142,18 @@ export function ChatToolbar() {
           size='icon'
           variant='ghost'
           className='hidden size-8 rounded-full sm:inline-flex lg:size-10'
-          onClick={notSupportedToast}
+          onClick={() => {
+            setState(NewCallModalState, true)
+            // skip this for now
+            // sendMessage({
+            //   action: "start_call",
+            //   recipient_id: [otherUser?.id],
+            //   vc_type: "audio",
+            //   vc_data: "test"
+            // })
+            // TODO open modal and wait until user answer it,
+            // if not show call failed and close button
+          }}
         >
           <IconPhone size={22} className='stroke-muted-foreground' />
         </Button>}

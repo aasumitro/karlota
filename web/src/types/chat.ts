@@ -19,3 +19,18 @@ export type Message = {
   created_at: string;
   updated_at: string;
 }
+
+// TODO: FIX
+export type Call = {
+  vc_type: string;
+  vc_data: string
+  vc_action: string;
+  vc_caller: number;
+}
+
+export enum CallStage {
+  Calling = "calling",
+  Accepted = "accepted",
+  Reject = "rejected",
+  Terminate = "terminated"
+}
