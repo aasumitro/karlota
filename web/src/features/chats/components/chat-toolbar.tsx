@@ -23,8 +23,6 @@ import {DeleteGroupModalState} from "@/features/chats/components/delete-group-mo
 import {NewCallModalState, NewCallState} from "@/features/chats/components/new-call";
 import {CallStage} from "@/types/chat";
 
-// TODO: watch this out
-
 export function ChatToolbar() {
   const sessionID = useAuthStore.getState().auth.user?.id;
   const { selectedChat, setSelectedChat, setMessages } = useChatStore();
@@ -118,22 +116,6 @@ export function ChatToolbar() {
           onClick={() => {
             setState(NewCallModalState, true)
             setStatus(NewCallState, CallStage.Calling)
-            // createConnection((candidate: RTCIceCandidate | null) => {
-            //   sendMessage({
-            //     action: "ice_candidate",
-            //     recipient_id: [otherUser?.id],
-            //     vc_type: "video_audio",
-            //     vc_data: candidate
-            //   })
-            // })
-            // createOffer((offer: RTCSessionDescriptionInit) => sendMessage({
-            //   action: "start_call",
-            //   recipient_id: [otherUser?.id],
-            //   vc_type: "video_audio",
-            //   vc_data: offer
-            // }))
-            // TODO open modal and wait until user answer it
-            // if not show call failed and close button
           }}
         >
           <IconVideo size={22} className='stroke-muted-foreground' />
@@ -142,18 +124,11 @@ export function ChatToolbar() {
           size='icon'
           variant='ghost'
           className='hidden size-8 rounded-full sm:inline-flex lg:size-10'
-          onClick={() => {
-            setState(NewCallModalState, true)
-            // skip this for now
-            // sendMessage({
-            //   action: "start_call",
-            //   recipient_id: [otherUser?.id],
-            //   vc_type: "audio",
-            //   vc_data: "test"
-            // })
-            // TODO open modal and wait until user answer it,
-            // if not show call failed and close button
-          }}
+          disabled
+          // onClick={() =>  {
+          //   setState(NewCallModalState, true)
+          //   setStatus(NewCallState, CallStage.Calling)
+          // }}
         >
           <IconPhone size={22} className='stroke-muted-foreground' />
         </Button>}

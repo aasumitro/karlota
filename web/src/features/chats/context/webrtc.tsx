@@ -1,8 +1,6 @@
 import {createContext, ReactNode, useCallback, useContext, useEffect, useRef, useState} from "react";
 import {MediaConnection, Peer} from "peerjs";
 
-// TODO: need some improvement
-
 interface WebRTCContext {
   getMyP2PId: () => string;
   onCall: (fn?: (call: MediaConnection) => void) => void;
@@ -31,65 +29,33 @@ export const WebRTCProvider = ({ children }: { children: ReactNode }) => {
   // Function to initialize PeerJS connection
   const createPeer = useCallback(() => {
     if (!p2pid || peerRef.current) return;
-    console.log("Initializing Peer with ID:", p2pid);
     peerRef.current = new Peer(p2pid);
-    peerRef.current.on("open", (id) => console.log("Peer connection established with ID:", id));
-    peerRef.current.on("connection", (conn) => {
-      conn.on('data', (data) => console.log(`received: ${data}`));
-      conn.on('open', () => conn.send('hello!'));
-    });
-    peerRef.current.on('call', (call) => {
-      navigator.mediaDevices.getUserMedia({video: true, audio: true})
-        .then((stream) => {
-          // todo
-          console.log(call, stream)
-          // call.answer(stream); // Answer the call with an A/V stream.
-          // call.on('stream', renderVideo);
-        })
-        .catch((err) => {
-          console.error('Failed to get local stream', err);
-        });
-    });
     peerRef.current.on("error", (err) => console.error("PeerJS Error:", err));
   }, [p2pid]);
 
   const getMyP2PId = useCallback(() => p2pid, [p2pid]);
 
-  // // todo
-  //  console.log(call, stream)
-  //  // call.answer(stream); // Answer the call with an A/V stream.
-  //  // call.on('stream', renderVideo);
-  // // navigator.mediaDevices.getUserMedia({video: true, audio: true})
-  //       //   .then((stream) => {
-  //       //     fn(call)
-  //       //   })
-  //       //   .catch((err) => {
-  //       //     console.error('Failed to get local stream', err);
-  //       //   });
   const onCall = useCallback((
     fn?: (call: MediaConnection) => void,
   ) => {
     if (!fn) return;
-    peerRef.current?.on('call', (call) => fn(call));
+    const conn =  peerRef.current
+    // conn?.on("open", (id) => console.log("Peer connection established with ID:", id));
+    // conn?.on("connection", (conn) => {
+    //   conn.on('data', (data) => console.log(`received: ${data}`));
+    //   conn.on('open', () => conn.send('hello!'));
+    // });
+    conn?.on('call', (call) => fn(call));
   }, []);
 
-  // navigator.mediaDevices.getUserMedia({video: true, audio: true})
-  //       .then((stream) => {
-  //         // todo
-  //         console.log(stream)
-  //         // const call = peerRef.current?.call(peerId, stream);
-  //         // call?.on('stream', renderVideo);
-  //       })
-  //       .catch((err) => {
-  //         console.log('Failed to get local stream', err);
-  //       });
   const connectPeer = useCallback((
     peerId: string, fn?: (conn: Peer) => void,
   ) => {
     if (!peerRef.current || !fn) return;
-    const conn =  peerRef.current.connect(peerId)
-    conn?.on('data', (data) => console.log(`received: ${data}`));
-    conn?.on('open', () => conn.send('hi!'));
+    peerRef.current.connect(peerId)
+    // const conn =
+    // conn?.on('data', (data) => console.log(`received: ${data}`));
+    // conn?.on('open', () => conn.send('hi!'));
     fn(peerRef?.current)
   }, [])
 

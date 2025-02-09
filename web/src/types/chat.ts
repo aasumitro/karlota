@@ -20,17 +20,17 @@ export type Message = {
   updated_at: string;
 }
 
-// TODO: FIX
 export type Call = {
-  vc_type: string;
-  vc_data: string
-  vc_action: string;
+  audio: boolean;
+  video: boolean;
+  peer_id: string
+  action: string;
   vc_caller: number;
 }
 
 export enum CallStage {
   Calling = "calling",
-  Accepted = "accepted",
+  Accept = "accepted",
   Reject = "rejected",
   Terminate = "terminated"
 }

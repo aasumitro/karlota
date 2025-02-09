@@ -19,7 +19,7 @@ const WebSocketContext = createContext<WebSocketContext | null>(null);
 
 export const WebSocketProvider = ({ children }: { children: ReactNode }) => {
   const { setChats, setMessages, setNewMessage, setOnlineStatus, setCall } = useChatStore();
-  const { setState,setStatus } = useGlobalActionStore();
+  const { setState, setStatus } = useGlobalActionStore();
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimer = useRef<NodeJS.Timeout | null>(null);
 
@@ -64,14 +64,11 @@ export const WebSocketProvider = ({ children }: { children: ReactNode }) => {
           setNewMessage(callback.data as Message);
           break;
         case "incoming_call":
-          // TODO: fix
-          setCall({vc_type: callback.data.type, vc_data: callback.data.payload,
-            vc_action: callback.data.action, vc_caller: callback.data.recipient})
+          setCall({...callback.data.payload, vc_caller: callback.data.recipient})
           setState(IncomingCallModalState, true)
           break;
         case "answer_call":
-          // TODO: FIx
-          setStatus(NewCallState, callback.data.action as CallStage)
+          setStatus(NewCallState, callback.data.payload.action as CallStage)
           break;
         default:
           break;

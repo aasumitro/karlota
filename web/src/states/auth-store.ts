@@ -36,30 +36,22 @@ export const useAuthStore = create<AuthState>()((set) => {
       accessToken: initAccessTokenToken,
       setAccessToken: (accessToken) =>
         set((state) => {
-          Cookies.set(ACCESS_TOKEN, JSON.stringify(accessToken), {
-            sameSite: 'None',
-            secure: true,
-          })
+          Cookies.set(ACCESS_TOKEN, JSON.stringify(accessToken))
           return { ...state, auth: { ...state.auth, accessToken } }
         }),
 
       refreshToken: initRefreshTokenToken,
       setRefreshToken: (refreshToken) =>
         set((state) => {
-          Cookies.set(REFRESH_TOKEN, JSON.stringify(refreshToken), {
-            sameSite: 'None',
-            secure: true,
-          })
+          Cookies.set(REFRESH_TOKEN, JSON.stringify(refreshToken))
           return { ...state, auth: { ...state.auth, refreshToken } }
         }),
 
       user: initUserProfile,
       setUser: (user) =>
         set((state) => {
-          Cookies.set(USER_PROFILE, JSON.stringify(user), {
-            sameSite: 'None',
-            secure: true,
-          })
+          // {sameSite: 'None', secure: true}
+          Cookies.set(USER_PROFILE, JSON.stringify(user))
           return { ...state, auth: { ...state.auth, user } }
         }),
 

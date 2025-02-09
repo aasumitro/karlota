@@ -42,7 +42,8 @@ const (
 	WSEventActionNewTextMessage   = "new_text_message"
 	WSEventActionDeleteGroup      = "delete_group"
 	WSEventActionLeaveGroup       = "leave_group"
-	// ...
+	WSEventCalling                = "calling"
+	WSEventAnswerCall             = "answering"
 )
 
 const (
@@ -53,5 +54,6 @@ const (
 	WSEventCallbackTypingState  = "typing_state"
 	WSEventCallbackNewMessage   = "new_message"
 	WSEventCallbackRefreshChat  = "refresh_chat"
-	// ...
+	WSEventCallbackIncomingCall = "incoming_call"
+	WSEventCallbackAnswerCall   = "answer_call"
 )

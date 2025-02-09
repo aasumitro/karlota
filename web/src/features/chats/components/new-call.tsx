@@ -1,13 +1,11 @@
 import {
   AlertDialog,
-  // AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
-  AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import {useState, /*FormEvent,*/ useEffect} from "react";
+import {useState, /*FormEvent,*/ useEffect, useRef} from "react";
 // import { Loader} from "lucide-react";
 // import { Button } from "@/components/ui/button";
 import {useGlobalActionStore} from "@/states/global-action-store";
@@ -17,6 +15,7 @@ import {useWebRTC} from "@/features/chats/context/webrtc";
 import {useAuthStore} from "@/states/auth-store";
 import {useChatStore} from "@/states/chat-store";
 import {CallStage, Chat} from "@/types/chat";
+import {MediaConnection} from "peerjs";
 // import {Chat} from "@/types/chat";
 // import {useAuthStore} from "@/states/auth-store";
 // import {ChatListState} from "@/features/chats/components/chat-list";
@@ -31,7 +30,7 @@ export function NewCallModal() {
   const [isDialogOpen, setDialogOpen] = useState(false);
   const { states, status, setState } = useGlobalActionStore();
   const { sendMessage } = useWebSocket();
-  const { getMyP2PId } = useWebRTC();
+  const { getMyP2PId, onCall } = useWebRTC();
   const sessionID = useAuthStore.getState().auth.user?.id;
   const { selectedChat } = useChatStore();
   const [callStage, setCallStage] = useState<CallStage>(CallStage.Calling);
@@ -45,33 +44,75 @@ export function NewCallModal() {
       sendMessage({
           action: "calling",
           recipient_id: getUserIds(selectedChat as Chat),
-          vc_type: "video_audio",
-          vc_data: getMyP2PId()
+          call: {
+            "audio": true,
+            "video": true,
+            "peer_id": getMyP2PId(),
+          },
       })
     }
     if (status[NewCallState]) {
       setCallStage(status[NewCallState] as CallStage)
     }
-  }, [states[NewCallModalState], status[NewCallState]]);
+  }, [states, status]);
 
   const onClose = () => {
     setState(NewCallModalState, false)
     setDialogOpen(false)
   }
 
+  const OnAccept = () => {
+    const remoteVideoRef = useRef<HTMLVideoElement | null>(null);
+    const myVideoRef = useRef<HTMLVideoElement | null>(null);
+
+    onCall(async (call: MediaConnection) => {
+      try {
+        const stream = await navigator.mediaDevices
+          .getUserMedia({ video: true, audio: true });
+        if (myVideoRef.current) {
+          myVideoRef.current.srcObject = stream;
+          call.answer(stream);
+        } else {
+          setTimeout(() => {
+            if (myVideoRef.current) {
+              myVideoRef.current.srcObject = stream;
+              call.answer(stream);
+            }
+          }, 100);
+        }
+
+        call.on('stream', (remoteStream) => {
+          if (remoteVideoRef.current) {
+            remoteVideoRef.current.srcObject = remoteStream;
+          } else {
+            setTimeout(() => {
+              if (remoteVideoRef.current) {
+                remoteVideoRef.current.srcObject = remoteStream;
+              }
+            }, 100);
+          }
+        });
+      } catch (err) {
+        console.error("Failed to get local stream", err);
+      }
+    });
+
+    return <div>
+      <video ref={remoteVideoRef} autoPlay playsInline />
+      <video ref={myVideoRef} autoPlay playsInline />
+    </div>
+  }
+
   return (
     <AlertDialog open={isDialogOpen} onOpenChange={onClose}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Calling . .. </AlertDialogTitle>
+          <AlertDialogTitle>Calling . . . </AlertDialogTitle>
           <AlertDialogDescription />
         </AlertDialogHeader>
         {callStage === CallStage.Calling && <>calling . . .</>}
-        {callStage === CallStage.Accepted && <>accepted</>}
+        {callStage === CallStage.Accept && <OnAccept />}
         {callStage === CallStage.Reject && <>rejected</>}
-        <AlertDialogFooter>
-          test
-        </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
   );

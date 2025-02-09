@@ -22,7 +22,11 @@ export function LogoutModal() {
   const navigate = useNavigate();
   const { states, setState } = useGlobalActionStore();
 
-  useEffect(() => setDialogOpen(states[LogoutModalState]), [states[LogoutModalState]]);
+  useEffect(() => {
+    if (states[LogoutModalState]){
+      setDialogOpen(states[LogoutModalState])
+    }
+  }, [states]);
 
   const onSubmit = (event: FormEvent) => {
     event.preventDefault();

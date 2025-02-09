@@ -27,7 +27,11 @@ export function DeleteGroupModal() {
   const { selectedChat, setSelectedChat } = useChatStore();
   const { sendMessage } = useWebSocket();
 
-  useEffect(() => setDialogOpen(states[DeleteGroupModalState]), [states[DeleteGroupModalState]]);
+  useEffect(() =>{
+    if (states[DeleteGroupModalState]) {
+      setDialogOpen(states[DeleteGroupModalState])
+    }
+  }, [states]);
 
   const getUserIds = (chat: Chat) => chat?.users
     .filter((user) => user.id !== sessionID).map(user => user.id) ?? [];

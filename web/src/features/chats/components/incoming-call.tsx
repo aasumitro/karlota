@@ -6,43 +6,103 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import {useState,  useEffect} from "react";
+import {useState, useEffect, useRef} from "react";
 import {useGlobalActionStore} from "@/states/global-action-store";
 import {useChatStore} from "@/states/chat-store";
 import {useWebSocket} from "@/features/chats/context/websocket";
 import {useWebRTC} from "@/features/chats/context/webrtc";
 import {CallStage} from "@/types/chat";
-
-// TODO: watch this out
+import {NewCallState} from "@/features/chats/components/new-call";
+import {Peer} from "peerjs";
 
 export const IncomingCallModalState = "incoming_modal_state"
 
 export function IncomingCallModal() {
   const [isDialogOpen, setDialogOpen] = useState(false);
-  const { states, setState } = useGlobalActionStore();
+  const { states, setState,setStatus } = useGlobalActionStore();
   const { sendMessage } = useWebSocket();
   const { getMyP2PId, connectPeer } = useWebRTC();
   const { call } = useChatStore();
+  const [callStage, setCallStage] = useState<CallStage>(CallStage.Calling);
 
-  useEffect(() => setDialogOpen(states[IncomingCallModalState]), [states[IncomingCallModalState]]);
+  // Ref for the remote video element
+  const myVideoRef = useRef<HTMLVideoElement | null>(null);
+  const remoteVideoRef = useRef<HTMLVideoElement | null>(null);
+
+  useEffect(() => {
+    if (states[IncomingCallModalState]) {
+      setDialogOpen(states[IncomingCallModalState])
+    }
+  }, [states]);
 
   const onClose = () => {
     setState(IncomingCallModalState, false)
     setDialogOpen(false)
+    setStatus(NewCallState, "")
   }
 
-  // https://glitch.com/edit/#!/peerjs-video?path=public%2Fmain.js%3A6%3A1
-  // et messagesEl = document.querySelector('.messages');
-  // let peerIdEl = document.querySelector('#connect-to-peer');
-  // let videoEl = document.querySelector('.remote-video');
-  // let logMessage = (message) => {
-  //   let newMessage = document.createElement('div');
-  //   newMessage.innerText = message;
-  //   messagesEl.appendChild(newMessage);
-  // };
-  // let renderVideo = (stream) => {
-  //   videoEl.srcObject = stream;
-  // };
+  const accept = async () => {
+    try {
+      const stream = await navigator.mediaDevices
+        .getUserMedia({ video: true, audio: true });
+      if (myVideoRef.current) {
+        myVideoRef.current.srcObject = stream;
+      } else {
+        setTimeout(() => {
+          if (myVideoRef.current) {
+            myVideoRef.current.srcObject = stream;
+          }
+        }, 100);
+      }
+
+      sendMessage({
+        recipient_id: [call?.vc_caller],
+        call: {
+          audio: true,
+          video: true,
+          peer_id: getMyP2PId(),
+          action: CallStage.Accept,
+        },
+        action: "answering",
+      });
+
+      // Establish peer connection
+      const peerId = call?.peer_id as string
+      connectPeer(peerId, (conn: Peer) => {
+        const onCall = conn.call(peerId, stream);
+        if (onCall) {
+          onCall.on("stream", (remoteStream) => {
+            if (remoteVideoRef.current) {
+              remoteVideoRef.current.srcObject = remoteStream;
+            } else {
+              setTimeout(() => {
+                if (remoteVideoRef.current) {
+                  remoteVideoRef.current.srcObject = remoteStream;
+                }
+              }, 100);
+            }
+          });
+        }
+      });
+      setCallStage(CallStage.Accept);
+    } catch (err) {
+      console.error("Failed to get local stream", err);
+    }
+  }
+
+  const reject =() => {
+    sendMessage({
+      action:"answering",
+      recipient_id: [call?.vc_caller],
+      call: {
+        "audio": true,
+        "video": true,
+        "peer_id": getMyP2PId(),
+        "action": CallStage.Reject
+      },
+    })
+    onClose();
+  }
 
   return (
     <AlertDialog open={isDialogOpen} onOpenChange={onClose}>
@@ -51,30 +111,16 @@ export function IncomingCallModal() {
           <AlertDialogTitle>Incoming call . .. </AlertDialogTitle>
           <AlertDialogDescription />
         </AlertDialogHeader>
-        <>
-          content {call?.vc_type} {call?.vc_data}
-        </>
-        <AlertDialogFooter>
-          <button onClick={() => {
-            sendMessage({
-              action:"answering",
-              vc_type: "video_audio",
-              recipient_id: [call?.vc_caller],
-              vc_data: getMyP2PId(),
-              vc_action: CallStage.Accepted
-            })
-            connectPeer(call?.vc_data as string);
-          }}> accept </button>
-          <button onClick={() => {
-            sendMessage({
-              action:"answering",
-              recipient_id: [call?.vc_caller],
-              vc_type: "video_audio",
-              vc_data: getMyP2PId(),
-              vc_action: CallStage.Reject
-            })
-          }}> reject </button>
-        </AlertDialogFooter>
+        {callStage === CallStage.Accept && (
+          <div>
+            <video ref={myVideoRef} autoPlay playsInline />
+            <video ref={remoteVideoRef} autoPlay playsInline />
+          </div>
+        )}
+        {callStage === CallStage.Calling && <AlertDialogFooter>
+          <button onClick={accept}> accept </button>
+          <button onClick={reject}> reject </button>
+        </AlertDialogFooter>}
       </AlertDialogContent>
     </AlertDialog>
   );

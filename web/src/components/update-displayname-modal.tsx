@@ -31,7 +31,11 @@ export function UpdateDisplayNameModal() {
   const { mutate: update, isPending} = useUpdateDisplayName();
   const {states, setState} = useGlobalActionStore();
 
-  useEffect(() => setDialogOpen(states[UpdateDisplayNameModalState]), [states[UpdateDisplayNameModalState]]);
+  useEffect(() => {
+    if (states[UpdateDisplayNameModalState]) {
+      setDialogOpen(states[UpdateDisplayNameModalState])
+    }
+  }, [states]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),

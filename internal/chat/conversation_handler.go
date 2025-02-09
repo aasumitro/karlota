@@ -12,6 +12,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	amqp "github.com/rabbitmq/amqp091-go"
+	"karlota.aasumitro.id/config"
 	"karlota.aasumitro.id/internal/common"
 	"karlota.aasumitro.id/internal/model/entity"
 	"karlota.aasumitro.id/internal/model/request"
@@ -20,16 +21,11 @@ import (
 	"karlota.aasumitro.id/internal/utils/http/wrapper"
 )
 
-// TODO: fix and watch this out
-
 var wsu = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
 	CheckOrigin: func(r *http.Request) bool {
-		for _, origin := range []string{
-			"http://localhost:3000",
-			"http://localhost:8000",
-		} {
+		for _, origin := range config.AllowOrigins {
 			if r.Header.Get("Origin") == origin {
 				return true
 			}
@@ -157,9 +153,9 @@ func (h *conversationHandler) onAction(
 			h.deleteGroup(ctx, &payload)
 		case common.WSEventActionLeaveGroup:
 			h.leaveGroup(ctx, &payload)
-		case "calling":
+		case common.WSEventCalling:
 			h.call(&payload)
-		case "answering":
+		case common.WSEventAnswerCall:
 			h.answer(&payload)
 		}
 	}
@@ -301,25 +297,31 @@ func (h *conversationHandler) leaveGroup(
 }
 
 func (h *conversationHandler) call(payload *request.WebsocketPayload) {
-	//if err := payload.ValidateNewCallRequest(); err != nil {
-	//	h.reply(common.WSEventCallbackErr, payload.UserID, err)
-	//	return
-	//}
-	//h.broadcast(payload.RecipientID, func(recipientID uint) {
-	//	h.reply("incoming_call", recipientID, map[string]interface{}{
-	//		"type": payload.VCType, "payload": payload.VCData, "recipient": payload.UserID})
-	//})
+	if err := payload.ValidateNewCallRequest(); err != nil {
+		h.reply(common.WSEventCallbackErr, payload.UserID, err)
+		return
+	}
+	if err := payload.Call.ValidateCallRequest(); err != nil {
+		h.reply(common.WSEventCallbackErr, payload.UserID, err)
+	}
+	h.broadcast(payload.RecipientID, func(recipientID uint) {
+		h.reply(common.WSEventCallbackIncomingCall, recipientID, map[string]interface{}{
+			"payload": payload.Call, "recipient": payload.UserID})
+	})
 }
 
 func (h *conversationHandler) answer(payload *request.WebsocketPayload) {
-	//if err := payload.ValidateNewCallRequest(); err != nil {
-	//	h.reply(common.WSEventCallbackErr, payload.UserID, err)
-	//	return
-	//}
-	//h.broadcast(payload.RecipientID, func(recipientID uint) {
-	//	h.reply("answer_call", recipientID, map[string]interface{}{
-	//		"type": payload.VCType, "payload": payload.VCData, "action": payload.VCAction})
-	//})
+	if err := payload.ValidateNewCallRequest(); err != nil {
+		h.reply(common.WSEventCallbackErr, payload.UserID, err)
+		return
+	}
+	if err := payload.Call.ValidateAnswerCallRequest(); err != nil {
+		h.reply(common.WSEventCallbackErr, payload.UserID, err)
+	}
+	h.broadcast(payload.RecipientID, func(recipientID uint) {
+		h.reply(common.WSEventCallbackAnswerCall, recipientID,
+			map[string]interface{}{"payload": payload.Call})
+	})
 }
 
 func (h *conversationHandler) broadcast(
@@ -383,6 +385,9 @@ func (h *conversationHandler) reply(
 func (h *conversationHandler) enqueueNotify(
 	replyType string, userID uint, data any,
 ) {
+	if replyType != common.WSEventCallbackNewMessage {
+		return
+	}
 	fmt.Println(replyType, userID, data)
 }
 

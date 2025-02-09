@@ -29,10 +29,7 @@ type (
 		TargetID       uint   `json:"target_id"`
 		TypingStatus   bool   `json:"typing_status"`
 		TextMessage    string `json:"text_message"`
-		//VCType         string `json:"vc_type"`
-		//VCData         string `json:"vc_data"`
-		//VCAction       string `json:"vc_action"`
-		Call *Call `json:"call"`
+		Call           *Call  `json:"call"`
 	}
 
 	Call struct {
@@ -95,7 +92,20 @@ func (r *WebsocketPayload) ValidateNewCallRequest() interface{} {
 	g := galidator.New()
 	return g.ComplexValidator(galidator.Rules{
 		"RecipientID": g.R("recipient_id").Required(),
-		"PeerID":      g.R("call.peer_id").Required(),
-		"VCData":      g.R("vc_data").Required(),
+	}).Validate(context.TODO(), r)
+}
+
+func (r *Call) ValidateCallRequest() interface{} {
+	g := galidator.New()
+	return g.ComplexValidator(galidator.Rules{
+		"PeerID": g.R("peer_id").Required(),
+	}).Validate(context.TODO(), r)
+}
+
+func (r *Call) ValidateAnswerCallRequest() interface{} {
+	g := galidator.New()
+	return g.ComplexValidator(galidator.Rules{
+		"PeerID": g.R("peer_id").Required(),
+		"Action": g.R("action").Required().Choices("accepted", "rejected"),
 	}).Validate(context.TODO(), r)
 }
