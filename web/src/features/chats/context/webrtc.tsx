@@ -40,11 +40,6 @@ export const WebRTCProvider = ({ children }: { children: ReactNode }) => {
   ) => {
     if (!fn) return;
     const conn =  peerRef.current
-    // conn?.on("open", (id) => console.log("Peer connection established with ID:", id));
-    // conn?.on("connection", (conn) => {
-    //   conn.on('data', (data) => console.log(`received: ${data}`));
-    //   conn.on('open', () => conn.send('hello!'));
-    // });
     conn?.on('call', (call) => fn(call));
   }, []);
 
@@ -53,9 +48,6 @@ export const WebRTCProvider = ({ children }: { children: ReactNode }) => {
   ) => {
     if (!peerRef.current || !fn) return;
     peerRef.current.connect(peerId)
-    // const conn =
-    // conn?.on('data', (data) => console.log(`received: ${data}`));
-    // conn?.on('open', () => conn.send('hi!'));
     fn(peerRef?.current)
   }, [])
 

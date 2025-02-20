@@ -6,7 +6,7 @@ import {
   AlertDialogTitle,
 } from "./ui/alert-dialog";
 import {useEffect, useState} from "react";
-import {Phone, Video} from "lucide-react";
+import {Video} from "lucide-react";
 import {Button} from "@/components/ui/button";
 import {Avatar, AvatarFallback} from "@/components/ui/avatar";
 import {useAuthStore} from "@/states/auth-store";
@@ -70,14 +70,14 @@ export function ProfileInfoModal() {
             </p>
           </div>
           <div className="flex flex-row items-center gap-4 mt-4">
-            <Button
-              variant="outline"
-              className="flex flex-col h-16 w-30 text-[10px]"
-              disabled
-            >
-              <Phone className="w-4 h-4" />
-              Audio
-            </Button>
+            {/*<Button*/}
+            {/*  variant="outline"*/}
+            {/*  className="flex flex-col h-16 w-30 text-[10px]"*/}
+            {/*  disabled*/}
+            {/*>*/}
+            {/*  <Phone className="w-4 h-4" />*/}
+            {/*  Audio*/}
+            {/*</Button>*/}
             <Button
               variant="outline"
               className="flex flex-col h-16 w-30 text-[10px]"

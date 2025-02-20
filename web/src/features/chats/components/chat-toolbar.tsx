@@ -1,5 +1,5 @@
 import {Button} from "@/components/ui/button";
-import {IconArrowLeft, IconDotsVertical, IconPhone, IconVideo} from "@tabler/icons-react";
+import {IconArrowLeft, IconDotsVertical, IconVideo} from "@tabler/icons-react";
 import {Avatar, AvatarFallback} from "@/components/ui/avatar";
 import {useChatStore} from "@/states/chat-store";
 import {useEffect, useState} from "react";
@@ -120,18 +120,18 @@ export function ChatToolbar() {
         >
           <IconVideo size={22} className='stroke-muted-foreground' />
         </Button>}
-        {selectedChat?.type === "private" &&  <Button
-          size='icon'
-          variant='ghost'
-          className='hidden size-8 rounded-full sm:inline-flex lg:size-10'
-          disabled
-          // onClick={() =>  {
-          //   setState(NewCallModalState, true)
-          //   setStatus(NewCallState, CallStage.Calling)
-          // }}
-        >
-          <IconPhone size={22} className='stroke-muted-foreground' />
-        </Button>}
+        {/*{selectedChat?.type === "private" &&  <Button*/}
+        {/*  size='icon'*/}
+        {/*  variant='ghost'*/}
+        {/*  className='hidden size-8 rounded-full sm:inline-flex lg:size-10'*/}
+        {/*  disabled*/}
+        {/*  // onClick={() =>  {*/}
+        {/*  //   setState(NewCallModalState, true)*/}
+        {/*  //   setStatus(NewCallState, CallStage.Calling)*/}
+        {/*  // }}*/}
+        {/*>*/}
+        {/*  <IconPhone size={22} className='stroke-muted-foreground' />*/}
+        {/*</Button>}*/}
         <DropdownMenu>
           <DropdownMenuTrigger>
             <IconDotsVertical className='stroke-muted-foreground sm:size-5' />
