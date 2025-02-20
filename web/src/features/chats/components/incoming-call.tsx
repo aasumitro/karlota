@@ -5,29 +5,29 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import {useEffect, useRef, useState} from "react";
-import {useGlobalActionStore} from "@/states/global-action-store";
-import {useChatStore} from "@/states/chat-store";
-import {useWebSocket} from "@/features/chats/context/websocket";
-import {useWebRTC} from "@/features/chats/context/webrtc";
-import {CallStage} from "@/types/chat";
-import {MediaConnection, Peer} from "peerjs";
-import {cn} from "@/lib/utils";
-import {Button} from "@/components/ui/button";
-import {PhoneIcon, PhoneOffIcon} from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { useGlobalActionStore } from "@/states/global-action-store";
+import { useChatStore } from "@/states/chat-store";
+import { useWebSocket } from "@/features/chats/context/websocket";
+import { useWebRTC } from "@/features/chats/context/webrtc";
+import { CallStage } from "@/types/chat";
+import { MediaConnection, Peer } from "peerjs";
+import { Button } from "@/components/ui/button";
+import { PhoneIcon, PhoneOffIcon } from "lucide-react";
 import callingSound from "@/assets/sounds/incoming-call.mp3";
 
-export const IncomingCallModalState = "incoming_modal_state"
+export const IncomingCallModalState = "incoming_modal_state";
 
 export function IncomingCallModal() {
   const [isDialogOpen, setDialogOpen] = useState(false);
+  const [callStage, setCallStage] = useState<CallStage>(CallStage.Calling);
+
   const { states, setState } = useGlobalActionStore();
   const { sendMessage } = useWebSocket();
   const { getMyP2PId, connectPeer } = useWebRTC();
   const { call } = useChatStore();
-  const [callStage, setCallStage] = useState<CallStage>(CallStage.Calling);
 
-  // Ref for the remote video element
+  // Video and Stream references
   const myVideoRef = useRef<HTMLVideoElement | null>(null);
   const remoteVideoRef = useRef<HTMLVideoElement | null>(null);
   const localStreamRef = useRef<MediaStream | null>(null);
@@ -35,54 +35,36 @@ export function IncomingCallModal() {
 
   useEffect(() => {
     if (states[IncomingCallModalState]) {
-      setDialogOpen(states[IncomingCallModalState])
+      setDialogOpen(true);
     }
   }, [states]);
 
-  const onClose = () => {
-    setState(IncomingCallModalState, false)
-    setCallStage(CallStage.Calling)
-    setDialogOpen(false)
-    // Stop local video/audio stream
+  const stopMediaStream = () => {
     if (localStreamRef.current) {
-      localStreamRef.current.getTracks().forEach(track => {
-        console.log("income", track.label)
-        track.stop()
-      });
+      localStreamRef.current.getTracks().forEach((track) => track.stop());
       localStreamRef.current = null;
-      console.log("Local stream stopped.");
     }
-    // Stop my video
-    if (myVideoRef.current) {
-      myVideoRef.current.remove()
-      myVideoRef.current.srcObject = null;
-      console.log("My video stopped.");
-    }
-    // Stop remote video
-    if (remoteVideoRef.current) {
-      remoteVideoRef.current.remove()
-      remoteVideoRef.current.srcObject = null;
-      console.log("Remote video stopped.");
-    }
-    callRef.current?.close()
-  }
+  };
 
-  const accept = async () => {
+  const clearVideoRefs = () => {
+    if (myVideoRef.current) myVideoRef.current.srcObject = null;
+    if (remoteVideoRef.current) remoteVideoRef.current.srcObject = null;
+  };
+
+  const closeCall = () => {
+    setState(IncomingCallModalState, false);
+    setCallStage(CallStage.Calling);
+    setDialogOpen(false);
+    stopMediaStream();
+    clearVideoRefs();
+    callRef.current?.close();
+  };
+
+  const acceptCall = async () => {
     try {
-      const stream = await navigator.mediaDevices
-        .getUserMedia({ video: true, audio: true });
-      if (myVideoRef.current) {
-        myVideoRef.current.srcObject = stream;
-        localStreamRef.current = stream
-      } else {
-        setTimeout(() => {
-          if (myVideoRef.current) {
-            myVideoRef.current.srcObject = stream;
-            localStreamRef.current = stream
-          }
-        }, 100);
-      }
-
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+      if (myVideoRef.current)  myVideoRef.current.srcObject = stream;
+      localStreamRef.current = stream;
       sendMessage({
         recipient_id: [call?.vc_caller],
         call: {
@@ -93,55 +75,47 @@ export function IncomingCallModal() {
         },
         action: "answering",
       });
-
-      // Establish peer connection
-      const peerId = call?.peer_id as string
+      // Establish Peer connection
+      const peerId = call?.peer_id as string;
       connectPeer(peerId, (conn: Peer) => {
-        const onCall = conn.call(peerId, stream);
-        if (onCall) {
-          onCall.on("stream", (remoteStream) => {
-            if (remoteVideoRef.current) {
-              remoteVideoRef.current.srcObject = remoteStream;
-            } else {
-              setTimeout(() => {
-                if (remoteVideoRef.current) {
-                  remoteVideoRef.current.srcObject = remoteStream;
-                }
-              }, 100);
-            }
+        const newCall = conn.call(peerId, stream);
+        if (newCall) {
+          newCall.on("stream", (remoteStream) => {
+            if (remoteVideoRef.current) remoteVideoRef.current.srcObject = remoteStream;
           });
+          newCall.on("close", closeCall);
+          callRef.current = newCall;
         }
-        onCall.on("close", () => onClose())
-        callRef.current = onCall
       });
       setCallStage(CallStage.Accept);
-    } catch (err) {
-      console.error("Failed to get local stream", err);
+    } catch (error) {
+      console.error("Error accessing media devices:", error);
     }
-  }
+  };
 
-  const reject =() => {
+  const rejectCall = () => {
     sendMessage({
-      action:"answering",
+      action: "answering",
       recipient_id: [call?.vc_caller],
       call: {
-        "audio": true,
-        "video": true,
-        "peer_id": getMyP2PId(),
-        "action": CallStage.Reject
+        audio: true,
+        video: true,
+        peer_id: getMyP2PId(),
+        action: CallStage.Reject,
       },
-    })
-    onClose();
-  }
+    });
+    closeCall();
+  };
 
   return (
-    <AlertDialog open={isDialogOpen} onOpenChange={onClose}>
+    <AlertDialog open={isDialogOpen} onOpenChange={closeCall}>
       <AlertDialogContent>
         <AlertDialogHeader className="hidden">
-          <AlertDialogTitle/>
+          <AlertDialogTitle />
           <AlertDialogDescription />
         </AlertDialogHeader>
-        {callStage === CallStage.Accept && (
+
+        {callStage === CallStage.Accept ? (
           <div className="relative w-full h-full">
             <video
               ref={remoteVideoRef}
@@ -155,45 +129,28 @@ export function IncomingCallModal() {
               playsInline
               className="absolute bottom-4 right-4 w-24 h-24 object-cover rounded-md border-2 border-white shadow-lg"
             />
-            <div
-              className={cn(
-                "absolute -bottom-12 left-1/2 transform -translate-x-1/2 ",
-                "object-cover rounded-md flex gap-2"
-              )}
-            >
-              <Button
-                variant="destructive"
-                size="icon"
-                className="rounded-full"
-                onClick={onClose}
-              >
+            <div className="absolute -bottom-12 left-1/2 transform -translate-x-1/2 flex gap-2">
+              <Button variant="destructive" size="icon" className="rounded-full" onClick={closeCall}>
+                <PhoneOffIcon />
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <div className="flex justify-between items-center">
+            <span>Incoming call...</span>
+            <audio src={callingSound} autoPlay loop />
+            <div className="flex gap-2">
+              <Button size="icon" className="rounded-full bg-green-500 text-white shadow-sm hover:bg-green-500/80" onClick={acceptCall}>
+                <PhoneIcon />
+              </Button>
+              <Button variant="destructive" size="icon" className="rounded-full" onClick={rejectCall}>
                 <PhoneOffIcon />
               </Button>
             </div>
           </div>
         )}
-        {callStage === CallStage.Calling && <div className="flex justify-between items-center">
-          Incoming call. . .
-          <audio src={callingSound} autoPlay loop />
-          <div className="object-cover rounded-md flex gap-2">
-            <Button
-              size="icon"
-              className="rounded-full bg-green-500 text-white shadow-sm hover:bg-green-500/80"
-              onClick={accept}
-            >
-              <PhoneIcon />
-            </Button>
-            <Button
-              variant="destructive"
-              size="icon"
-              className="rounded-full"
-              onClick={reject}
-            >
-              <PhoneOffIcon />
-            </Button>
-          </div>
-        </div>}
       </AlertDialogContent>
     </AlertDialog>
   );
 }
+
