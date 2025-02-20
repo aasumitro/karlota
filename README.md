@@ -1,5 +1,7 @@
 # Karlota Messenger
 
+<img src="https://raw.githubusercontent.com/aasumitro/aasumitro/refs/heads/master/projects/previews/karlota.gif" alt="gif">
+
 a chat & call sample app with WebSocket and PeerJS
 
 ### Features:
