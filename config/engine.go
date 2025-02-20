@@ -8,9 +8,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-var allowOrigins = []string{
+var AllowOrigins = []string{
 	"http://localhost:3000",
 	"http://localhost:8000",
+	"http://192.168.89.82:8000",
 }
 
 var allowMethods = []string{"GET, POST, PATCH, DELETE"}
@@ -46,7 +47,7 @@ func GinEngine() Option {
 		cfg.Infra.GinEngine = gin.Default()
 		// set cors middleware
 		cfg.Infra.GinEngine.Use(cors.New(cors.Config{
-			AllowOrigins:     allowOrigins,
+			AllowOrigins:     AllowOrigins,
 			AllowMethods:     allowMethods,
 			AllowHeaders:     allowHeaders,
 			ExposeHeaders:    exposeHeaders,

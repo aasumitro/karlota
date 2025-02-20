@@ -72,8 +72,7 @@ export function isJWTExpired(token: string): boolean {
   try {
     const t = jwtDecode<JwtPayload>(token);
     return !t.exp || dayjs.unix(t.exp).diff(dayjs()) < 1;
-  } catch (error) {
-    console.warn("isJWTExpired failed to decode token:", error);
+  } catch {
     return true;
   }
 }

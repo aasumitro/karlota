@@ -71,7 +71,7 @@ export function SignUpForm({ className, ...props }: SignUpFormProps) {
         auth.setAccessToken(resp.access_token.str as string)
         auth.setRefreshToken(resp.refresh_token.str as string)
         auth.setUser(resp.user as Profile)
-        await navigate({to: '/chats', replace: true})
+        setTimeout(() => navigate({ to: '/chats', replace: true }), 250);
       },
     });
   }

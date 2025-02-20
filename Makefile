@@ -85,3 +85,9 @@ run-watch-app:
 build-fe:
 	@ echo "Build Frontend"
 	@ cd web && npm install && npm run build
+
+.Phony: gen-ssl
+gen-ssl:
+	@ openssl genpkey -algorithm RSA -out ./misc/ssl/key.pem
+	@ openssl req -new -key ./misc/ssl/key.pem -out ./misc/ssl/csr.pem
+	@ openssl x509 -req -in ./misc/ssl/csr.pem -signkey ./misc/ssl/key.pem -out ./misc/ssl/cert.pem

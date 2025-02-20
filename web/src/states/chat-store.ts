@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import {Chat, Message} from "@/types/chat";
+import {Call, Chat, Message} from "@/types/chat";
 import {useGlobalActionStore} from "@/states/global-action-store";
 import {RefreshChatListState} from "@/features/chats/components/chat-list";
 import {Profile} from "@/types/user";
@@ -9,6 +9,7 @@ interface States {
   selectedChat: Chat | null;
   mobileSelectedChat: Chat | null;
   messages: Message[] | null;
+  call: Call | null;
 }
 
 interface Actions {
@@ -17,6 +18,7 @@ interface Actions {
   setMessages: (messages: Message[] | null) => void;
   setNewMessage: (message: Message) => void
   setOnlineStatus: (user: Profile, chatId: number) => void
+  setCall: (call: Call | null) => void;
 }
 
 export const useChatStore = create<States & Actions>((set) => ({
@@ -24,6 +26,7 @@ export const useChatStore = create<States & Actions>((set) => ({
   selectedChat: null,
   mobileSelectedChat: null,
   messages: [],
+  call: null,
 
   setChats: (chats:  Chat[]) =>
     set((state) => {
@@ -101,5 +104,10 @@ export const useChatStore = create<States & Actions>((set) => ({
 
       return updatedState;
     });
-  }
+  },
+
+  setCall: (call:  Call | null) =>
+    set((state) => {
+      return { ...state, call }
+    }),
 }));

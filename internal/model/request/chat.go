@@ -29,6 +29,14 @@ type (
 		TargetID       uint   `json:"target_id"`
 		TypingStatus   bool   `json:"typing_status"`
 		TextMessage    string `json:"text_message"`
+		Call           *Call  `json:"call"`
+	}
+
+	Call struct {
+		Audio  bool   `json:"audio"`
+		Video  bool   `json:"video"`
+		PeerID string `json:"peer_id"`
+		Action string `json:"action"`
 	}
 )
 
@@ -77,5 +85,27 @@ func (r *WebsocketPayload) ValidateOnlineStatusRequest() interface{} {
 	return g.ComplexValidator(galidator.Rules{
 		"TargetID":       g.R("target_id").Required(),
 		"ConversationID": g.R("conversation_id").Required(),
+	}).Validate(context.TODO(), r)
+}
+
+func (r *WebsocketPayload) ValidateNewCallRequest() interface{} {
+	g := galidator.New()
+	return g.ComplexValidator(galidator.Rules{
+		"RecipientID": g.R("recipient_id").Required(),
+	}).Validate(context.TODO(), r)
+}
+
+func (r *Call) ValidateCallRequest() interface{} {
+	g := galidator.New()
+	return g.ComplexValidator(galidator.Rules{
+		"PeerID": g.R("peer_id").Required(),
+	}).Validate(context.TODO(), r)
+}
+
+func (r *Call) ValidateAnswerCallRequest() interface{} {
+	g := galidator.New()
+	return g.ComplexValidator(galidator.Rules{
+		"PeerID": g.R("peer_id").Required(),
+		"Action": g.R("action").Required().Choices("accepted", "rejected"),
 	}).Validate(context.TODO(), r)
 }

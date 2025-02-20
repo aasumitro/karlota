@@ -16,7 +16,7 @@ interface ChatListProps {
 }
 
 export const ChatListState = "chat_list_state"
-export const RefreshChatListState = "refrehs_chat_list_state"
+export const RefreshChatListState = "refresh_chat_list_state"
 
 export function ChatList({ chats }: ChatListProps) {
   const sessionID = useAuthStore.getState().auth.user?.id;
@@ -45,7 +45,9 @@ export function ChatList({ chats }: ChatListProps) {
     <ScrollArea className='h-full p-3'>
       {states[ChatListState] && <ChatListSkeleton len={25}/>}
 
-      {!states[ChatListState] && chats.length === 0 && <>create new chat</>}
+      {!states[ChatListState] && chats.length === 0 && <div className="text-center w-full">
+        No Conversations Yet
+      </div>}
 
       {chats.map((chat) => {
         let name = "";

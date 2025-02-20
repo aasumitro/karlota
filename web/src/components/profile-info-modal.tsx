@@ -6,28 +6,40 @@ import {
   AlertDialogTitle,
 } from "./ui/alert-dialog";
 import {useEffect, useState} from "react";
-import {Phone, Video} from "lucide-react";
+import {Video} from "lucide-react";
 import {Button} from "@/components/ui/button";
 import {Avatar, AvatarFallback} from "@/components/ui/avatar";
 import {useAuthStore} from "@/states/auth-store";
 import {useGlobalActionStore} from "@/states/global-action-store";
 import {useSelectActionStore} from "@/states/select-action-store";
 import {formatOnlineTime} from "@/lib/time";
+import {NewCallModalState, NewCallState} from "@/features/chats/components/new-call";
+import {CallStage} from "@/types/chat";
 
 export const ProfileInfoModalState = "profile_info_modal_state"
 
 export function ProfileInfoModal() {
   const [isDialogOpen, setDialogOpen] = useState(false);
   const {auth} = useAuthStore();
-  const {states, setState} = useGlobalActionStore();
+  const {states, setState, setStatus} = useGlobalActionStore();
   const {user, setUser} = useSelectActionStore();
 
-  useEffect(() => setDialogOpen(states[ProfileInfoModalState]), [states[ProfileInfoModalState]]);
+  useEffect(() => {
+    if (states[ProfileInfoModalState]) {
+      setDialogOpen(states[ProfileInfoModalState])
+    }
+  }, [states]);
 
   const onClose = () => {
     setState(ProfileInfoModalState, false);
     setDialogOpen(false);
     setUser(null);
+  }
+
+  const videoCall  = () => {
+    setState(NewCallModalState, true)
+    setStatus(NewCallState, CallStage.Calling)
+    onClose();
   }
 
   return (
@@ -58,18 +70,19 @@ export function ProfileInfoModal() {
             </p>
           </div>
           <div className="flex flex-row items-center gap-4 mt-4">
+            {/*<Button*/}
+            {/*  variant="outline"*/}
+            {/*  className="flex flex-col h-16 w-30 text-[10px]"*/}
+            {/*  disabled*/}
+            {/*>*/}
+            {/*  <Phone className="w-4 h-4" />*/}
+            {/*  Audio*/}
+            {/*</Button>*/}
             <Button
               variant="outline"
               className="flex flex-col h-16 w-30 text-[10px]"
               disabled={auth?.user?.id == user?.id}
-            >
-              <Phone className="w-4 h-4" />
-              Audio
-            </Button>
-            <Button
-              variant="outline"
-              className="flex flex-col h-16 w-30 text-[10px]"
-              disabled={auth?.user?.id == user?.id}
+              onClick={videoCall}
             >
               <Video className="w-4 h-4" />
               Video

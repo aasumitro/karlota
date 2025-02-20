@@ -27,7 +27,11 @@ export function LeaveGroupModal() {
   const { selectedChat, setSelectedChat } = useChatStore();
   const { sendMessage } = useWebSocket();
 
-  useEffect(() => setDialogOpen(states[LeaveGroupModalState]), [states[LeaveGroupModalState]]);
+  useEffect(() => {
+    if (states[LeaveGroupModalState]) {
+      setDialogOpen(states[LeaveGroupModalState])
+    }
+  }, [states]);
 
   const getUserIds = (chat: Chat) => chat?.users
     .filter((user) => user.id !== sessionID).map(user => user.id) ?? [];

@@ -49,7 +49,11 @@ export function UpdatePasswordModal() {
   const navigate = useNavigate();
   const {states, setState} = useGlobalActionStore();
 
-  useEffect(() => setDialogOpen(states[UpdatePasswordModalState]), [states[UpdatePasswordModalState]]);
+  useEffect(() => {
+    if (states[UpdatePasswordModalState]) {
+      setDialogOpen(states[UpdatePasswordModalState])
+    }
+  }, [states]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),

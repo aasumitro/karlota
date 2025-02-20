@@ -1,5 +1,5 @@
 import {Button} from "@/components/ui/button";
-import {IconArrowLeft, IconDotsVertical, IconPhone, IconVideo} from "@tabler/icons-react";
+import {IconArrowLeft, IconDotsVertical, IconVideo} from "@tabler/icons-react";
 import {Avatar, AvatarFallback} from "@/components/ui/avatar";
 import {useChatStore} from "@/states/chat-store";
 import {useEffect, useState} from "react";
@@ -20,6 +20,8 @@ import {ProfileInfoModalState} from "@/components/profile-info-modal";
 import {useSelectActionStore} from "@/states/select-action-store";
 import {Profile} from "@/types/user";
 import {DeleteGroupModalState} from "@/features/chats/components/delete-group-modal";
+import {NewCallModalState, NewCallState} from "@/features/chats/components/new-call";
+import {CallStage} from "@/types/chat";
 
 export function ChatToolbar() {
   const sessionID = useAuthStore.getState().auth.user?.id;
@@ -28,7 +30,7 @@ export function ChatToolbar() {
   const [description, setDescription] = useState("")
   const [currentUser, setCurrentUser] = useState<Profile | null>(null)
   const [otherUser, setOtherUser] = useState<Profile | null>(null)
-  const {setState} = useGlobalActionStore();
+  const {setState, setStatus} = useGlobalActionStore();
   const { setUser } = useSelectActionStore();
 
   const notSupportedToast = () => {
@@ -111,18 +113,25 @@ export function ChatToolbar() {
           size='icon'
           variant='ghost'
           className='hidden size-8 rounded-full sm:inline-flex lg:size-10'
-          onClick={notSupportedToast}
+          onClick={() => {
+            setState(NewCallModalState, true)
+            setStatus(NewCallState, CallStage.Calling)
+          }}
         >
           <IconVideo size={22} className='stroke-muted-foreground' />
         </Button>}
-        {selectedChat?.type === "private" &&  <Button
-          size='icon'
-          variant='ghost'
-          className='hidden size-8 rounded-full sm:inline-flex lg:size-10'
-          onClick={notSupportedToast}
-        >
-          <IconPhone size={22} className='stroke-muted-foreground' />
-        </Button>}
+        {/*{selectedChat?.type === "private" &&  <Button*/}
+        {/*  size='icon'*/}
+        {/*  variant='ghost'*/}
+        {/*  className='hidden size-8 rounded-full sm:inline-flex lg:size-10'*/}
+        {/*  disabled*/}
+        {/*  // onClick={() =>  {*/}
+        {/*  //   setState(NewCallModalState, true)*/}
+        {/*  //   setStatus(NewCallState, CallStage.Calling)*/}
+        {/*  // }}*/}
+        {/*>*/}
+        {/*  <IconPhone size={22} className='stroke-muted-foreground' />*/}
+        {/*</Button>}*/}
         <DropdownMenu>
           <DropdownMenuTrigger>
             <IconDotsVertical className='stroke-muted-foreground sm:size-5' />

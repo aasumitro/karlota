@@ -5,7 +5,7 @@ import {useAuthStore} from "@/states/auth-store";
 import {isJWTExpired} from "@/lib/jwt";
 import {Profile} from "@/types/user";
 
-const host = "localhost:8000" // ${window.location.host} << use this in prod
+const host =  process.env.NODE_ENV === 'production' ? window.location.host : "localhost:8000"
 const REST_URL = `${window.location.protocol}//${host}/api/v1`
 const WS_URL = `ws://${host}/api/v1`
 
@@ -123,8 +123,7 @@ api.interceptors.request.use(async  (config) => {
         auth.setUser(user as Profile);
         config.headers.Authorization = `Bearer ${access_token.str}`;
       }
-    } catch (error) {
-      console.error("Error refreshing token:", error);
+    } catch {
       auth.reset();
     }
   }
