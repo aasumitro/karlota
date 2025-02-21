@@ -2,7 +2,7 @@
 
 <img src="https://raw.githubusercontent.com/aasumitro/aasumitro/refs/heads/master/projects/previews/karlota.gif" alt="gif">
 
-a chat & call sample app with WebSocket and PeerJS
+a chat with video call sample
 
 ### Features:
 1. Private Chat (Text)
