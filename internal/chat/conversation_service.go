@@ -19,6 +19,8 @@ type conversationService struct {
 	messageCommandRepository      sqlRepo.ISQLCommandRepository[*entity.Message, entity.Message]
 	messageQueryRepository        sqlRepo.ISQLQueryRepository[*entity.Message, entity.Message]
 	chatQueryRepository           sqlRepo.ISQLQueryRepository[*entity.UserChat, entity.UserChat]
+	queueQueryRepository          sqlRepo.ISQLQueryRepository[*entity.Queue, entity.Queue]
+	queueCommandRepository        sqlRepo.ISQLCommandRepository[*entity.Queue, entity.Queue]
 }
 
 func (service *conversationService) New(
@@ -220,6 +222,41 @@ func (service *conversationService) leaveConversation() error {
 	return nil
 }
 
+func (service *conversationService) AddMessageQueue(
+	ctx context.Context,
+	userID uint,
+	msg *entity.Message,
+) {
+	now := time.Now()
+	data := &entity.Queue{
+		Target:    "USER",
+		TargetID:  userID,
+		Trigger:   "ONLINE",
+		Payload:   fmt.Sprintf("New Message: %s", msg.Content),
+		CreatedAt: &now,
+	}
+	_ = service.queueCommandRepository.Insert(ctx, data)
+
+}
+func (service *conversationService) LoadQueue(
+	ctx context.Context,
+	userID uint,
+) ([]*entity.Queue, error) {
+	limit, offset := -1, -1 // we will load all for now
+	data, err := service.queueQueryRepository.FindWithLimit(ctx, limit, offset,
+		sqlRepo.And(sqlRepo.IsNull("updated_at"), sqlRepo.Equal("target_id", userID)))
+	if err != nil {
+		return nil, err
+	}
+	return data, nil
+}
+
+func (service *conversationService) DeleteQueue(
+	ctx context.Context, q *entity.Queue,
+) {
+	_ = service.queueCommandRepository.DeleteByID(ctx, q.ID)
+}
+
 func NewConversationService(
 	conversationCommandRepository sqlRepo.ISQLCommandRepository[*entity.Conversation, entity.Conversation],
 	participantQueryRepository sqlRepo.ISQLQueryRepository[*entity.Participant, entity.Participant],
@@ -227,6 +264,8 @@ func NewConversationService(
 	messageCommandRepository sqlRepo.ISQLCommandRepository[*entity.Message, entity.Message],
 	messageQueryRepository sqlRepo.ISQLQueryRepository[*entity.Message, entity.Message],
 	chatQueryRepository sqlRepo.ISQLQueryRepository[*entity.UserChat, entity.UserChat],
+	queueQueryRepository sqlRepo.ISQLQueryRepository[*entity.Queue, entity.Queue],
+	queueCommandRepository sqlRepo.ISQLCommandRepository[*entity.Queue, entity.Queue],
 ) IConversationService {
 	return &conversationService{
 		conversationCommandRepository: conversationCommandRepository,
@@ -235,5 +274,7 @@ func NewConversationService(
 		messageCommandRepository:      messageCommandRepository,
 		messageQueryRepository:        messageQueryRepository,
 		chatQueryRepository:           chatQueryRepository,
+		queueQueryRepository:          queueQueryRepository,
+		queueCommandRepository:        queueCommandRepository,
 	}
 }

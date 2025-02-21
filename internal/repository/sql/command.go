@@ -16,7 +16,7 @@ func (repository sqlCommandRepository[M, R]) Insert(
 ) error {
 	var start M
 	model := start.FromResponse(entity).(M)
-	err := repository.orm.WithContext(ctx).Create(&model).Error
+	err := repository.orm.WithContext(ctx).Omit("updated_at").Create(&model).Error
 	if err != nil {
 		return err
 	}
