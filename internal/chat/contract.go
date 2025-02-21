@@ -20,4 +20,8 @@ type IConversationService interface {
 	RequestDeleteGroup(ctx context.Context, payload *request.WebsocketPayload) error
 	RequestLeaveGroup(ctx context.Context, payload *request.WebsocketPayload) (*entity.Message, error)
 	RequestLeaveConversation(ctx context.Context, payload *request.WebsocketPayload) error
+
+	AddMessageQueue(ctx context.Context, userID uint, msg *entity.Message)
+	LoadQueue(ctx context.Context, userID uint) ([]*entity.Queue, error)
+	DeleteQueue(ctx context.Context, q *entity.Queue)
 }

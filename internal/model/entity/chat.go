@@ -3,7 +3,6 @@ package entity
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"time"
 
 	"karlota.aasumitro.id/internal/common"
@@ -47,9 +46,7 @@ func (c *UserChat) ToResponse() *UserChat {
 		CreatedAt: c.CreatedAt,
 		UpdatedAt: c.UpdatedAt,
 	}
-	if err := json.Unmarshal([]byte(c.UsersRaw), &uc.Users); err != nil {
-		log.Println("failed to decode users conv:", uc.ID)
-	}
+	_ = json.Unmarshal([]byte(c.UsersRaw), &uc.Users)
 	for _, u := range uc.Users {
 		if u.Role == "none" {
 			u.Role = ""
@@ -67,9 +64,7 @@ func (c *UserChat) ToResponse() *UserChat {
 			}
 		}
 	}
-	if err := json.Unmarshal([]byte(c.MessagesRaw), &uc.Messages); err != nil {
-		log.Println("failed to decode messages conv:", uc.ID)
-	}
+	_ = json.Unmarshal([]byte(c.MessagesRaw), &uc.Messages)
 	return uc
 }
 

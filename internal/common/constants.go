@@ -56,4 +56,5 @@ const (
 	WSEventCallbackRefreshChat  = "refresh_chat"
 	WSEventCallbackIncomingCall = "incoming_call"
 	WSEventCallbackAnswerCall   = "answer_call"
+	WSEventCallbackNotification = "notification"
 )

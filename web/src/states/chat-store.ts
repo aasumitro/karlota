@@ -55,10 +55,13 @@ export const useChatStore = create<States & Actions>((set) => ({
         }
         return chat;
       });
+
       const newState = {
         ...state,
         chats: updatedChats,
-        messages: state.messages ? [...state.messages, message] : [message],
+        messages: state.selectedChat?.id === message.conversation_id
+          ? [...(state.messages || []), message]
+          : state.messages,
       };
 
       const chat = state.chats?.find(
@@ -73,6 +76,7 @@ export const useChatStore = create<States & Actions>((set) => ({
           messages: [message],
         };
       }
+
       return newState;
     });
   },

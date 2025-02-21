@@ -17,11 +17,14 @@ func NewChatProvider(router *gin.RouterGroup, infra *config.Infra) {
 	messageCommandRepository := sqlRepo.NewSQLCommandRepository[*entity.Message, entity.Message](infra.GormPool)
 	messageQueryRepository := sqlRepo.NewSQLQueryRepository[*entity.Message, entity.Message](infra.GormPool)
 	chatQueryRepository := sqlRepo.NewSQLQueryRepository[*entity.UserChat, entity.UserChat](infra.GormPool)
+	queueQueryRepository := sqlRepo.NewSQLQueryRepository[*entity.Queue, entity.Queue](infra.GormPool)
+	queueCommandRepository := sqlRepo.NewSQLCommandRepository[*entity.Queue, entity.Queue](infra.GormPool)
 	// contact handler
 	contactSrv := NewContactService(userQueryRepository)
 	NewContactHandler(routerGroup, contactSrv)
 	// chat (conversation) handler
 	convSrv := NewConversationService(conversationCommandRepository, participantQueryRepository,
-		participantCommandRepository, messageCommandRepository, messageQueryRepository, chatQueryRepository)
+		participantCommandRepository, messageCommandRepository, messageQueryRepository,
+		chatQueryRepository, queueQueryRepository, queueCommandRepository)
 	NewConversationHandler(routerGroup, convSrv, infra.RabbitMQConsumer)
 }

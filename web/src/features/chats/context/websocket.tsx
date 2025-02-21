@@ -10,6 +10,7 @@ import {Profile} from "@/types/user";
 import {IncomingCallModalState} from "@/features/chats/components/incoming-call";
 import {NewCallState} from "@/features/chats/components/new-call";
 // import {toast} from "@/hooks/use-toast";
+import { toast } from "sonner"
 
 interface WebSocketContext {
   sendMessage: (payload: any) => void;
@@ -70,6 +71,9 @@ export const WebSocketProvider = ({ children }: { children: ReactNode }) => {
         case "answer_call":
           setStatus(NewCallState, callback.data.payload.action as CallStage)
           break;
+        case "notification":
+          toast(callback.data)
+          break
         default:
           break;
       }

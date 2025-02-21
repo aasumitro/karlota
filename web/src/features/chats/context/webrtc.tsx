@@ -74,6 +74,7 @@ export const WebRTCProvider = ({ children }: { children: ReactNode }) => {
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useWebRTC = (): WebRTCContext => {
   const context = useContext(WebRTCContext);
   if (!context) {

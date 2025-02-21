@@ -112,7 +112,7 @@ func (h *conversationHandler) onOpen(
 	cache.Instance().Set(onlineStatusKey, true, cache.NoExpiration)
 	cache.Instance().Set(lastOnlineKey, time.Now().Unix(), cache.NoExpiration)
 	// check notify from queue table and sent to user when online
-	h.dequeueNotify(userID)
+	go h.dequeueNotify(userID)
 }
 
 func (h *conversationHandler) onAction(
@@ -388,11 +388,25 @@ func (h *conversationHandler) enqueueNotify(
 	if replyType != common.WSEventCallbackNewMessage {
 		return
 	}
-	fmt.Println(replyType, userID, data)
+	msg, ok := data.(*entity.Message)
+	if !ok {
+		return
+	}
+	h.srv.AddMessageQueue(context.Background(), userID, msg)
 }
 
 func (h *conversationHandler) dequeueNotify(userID uint) {
-	fmt.Println(userID)
+	ctx := context.Background()
+	notify, err := h.srv.LoadQueue(ctx, userID)
+	if err != nil {
+		return
+	}
+	for _, msg := range notify {
+		h.reply(common.WSEventCallbackNotification, msg.TargetID, msg.Payload)
+		now := time.Now()
+		msg.UpdatedAt = &now
+		h.srv.DeleteQueue(ctx, msg)
+	}
 }
 
 func NewConversationHandler(

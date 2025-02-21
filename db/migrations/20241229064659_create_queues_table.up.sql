@@ -6,5 +6,5 @@ CREATE TABLE IF NOT EXISTS queues
     trigger VARCHAR NOT NULL, -- ONLINE, ACTION, ETC.
     payload text NOT NULL, -- json item
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    updated_at DATETIME DEFAULT NULL
 );
